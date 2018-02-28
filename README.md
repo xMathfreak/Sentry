@@ -1,1 +1,2 @@
 # SentryBot
+A discord Bot

@@ -1,0 +1,14 @@
+{
+  "name": "sentrybot",
+  "version": "1.0.0a",
+  "description": "In Development",
+  "main": "bot.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "Mathfreak",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.3.0"
+  }
+}
