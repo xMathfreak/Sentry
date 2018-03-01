@@ -33,7 +33,7 @@ client.on("message", async message => {
     }
  
     if (message.content === prefix+'ping') {
-        message.reply(new Date().getTime() - message.createdTimestamp + " ms");
+        message.reply(":ping_pong:" new Date().getTime() - message.createdTimestamp + " ms");
     }
 
     if (message.content === 'Hey Sentry') {
