@@ -52,6 +52,10 @@ client.on("message", async message => {
         message.reply('https://pics.me.me/henlo-dere-28500676.png');
     }
     
+    if (message.content === prefix+'cheekibreeki') {
+        message.reply('http://i0.kym-cdn.com/entries/icons/original/000/014/754/cheeki.jpg');
+    }
+    
     if (message.content === prefix+'flip') {
         var result = Math.floor((Math.random() * 2) + 1);
     	if (result == 1) {
