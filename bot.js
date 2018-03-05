@@ -47,6 +47,18 @@ client.on("message", async message => {
     if (message.content === 'Henlo') {
         message.reply('https://pics.me.me/henlo-dere-28500676.png');
     }
+
+    if (message.content === "You're mum gay") {
+        message.reply('no u');
+    }
+    
+    if (message.content === "you're mum gay") {
+        message.reply('no u');
+    }
+    
+    if (message.content === "your mum gay") {
+        message.reply('no u');
+    }
     
     if (message.content === 'henlo') {
         message.reply('https://pics.me.me/henlo-dere-28500676.png');
