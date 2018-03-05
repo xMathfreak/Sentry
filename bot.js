@@ -56,6 +56,10 @@ client.on("message", async message => {
         message.reply('no u');
     }
     
+    if (message.content === "youre mum gay") {
+        message.reply('no u');
+    }
+    
     if (message.content === "your mum gay") {
         message.reply('no u');
     }
