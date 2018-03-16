@@ -93,4 +93,4 @@ client.on('guildMemberAdd', member => {
   channel.send(`Welcome to the server, ${member}. Check out our group if you already haven't at https://www.youtube.com/channel/UCXjXTWB_yWIn5El8EJsBcCA?app=desktop`);
 });
 
-client.login('NDE2MjIyNzUwMjI3NjkzNTc5.DXCRRw.4O1d2VY5d58CyUeZfhzwE2nT5oU');
+client.login('NDE2MjIyNzUwMjI3NjkzNTc5.DY2c9g.v6eENqavN1MnAJP16mGj8h4JZtE');
