@@ -8,7 +8,7 @@ client.on("message", (message) => {
     // our new check:
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     // [rest of the code]-
-    client.user.setGame("Do s!help. [Version: 0.0.1a]")
+    client.user.setGame("Do s!help | v0.0.1a")
   });
   
 client.on('ready', () => {
