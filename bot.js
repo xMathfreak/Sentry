@@ -8,6 +8,7 @@ client.on("message", (message) => {
     // our new check:
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     // [rest of the code]-
+    client.user.setGame("Do s!help. [Version: 0.0.1a"])
   });
   
 client.on('ready', () => {
@@ -82,15 +83,4 @@ client.on("message", async message => {
     }
 });
  
-
-// Create an event listener for new guild members
-client.on('guildMemberAdd', member => {
-  // Send the message to a designated channel on a server:
-  const channel = member.guild.channels.find('name', 'member-log');
-  // Do nothing if the channel wasn't found on this server
-  if (!channel) return;
-  // Send the message, mentioning the member
-  channel.send(`Welcome to the server, ${member}. Check out our group if you already haven't at https://www.youtube.com/channel/UCXjXTWB_yWIn5El8EJsBcCA?app=desktop`);
-});
-
 client.login('NDI0MjcyOTIzNzYzODAyMTEy.DY2ehA.z7sb0omamDO5tO8I8daAcNgf9CE');
