@@ -12,7 +12,7 @@ client.on("message", (message) => {
   
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  client.user.setGame("Do s!help | v0.0.1a");   
+  client.user.setGame("s!help | v0.0.2a");   
 });
 
 client.on("message", async message => {
