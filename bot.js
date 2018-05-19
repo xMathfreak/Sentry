@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const talkedRecently = new Set();
 
 var prefix = "s!"
 var admprefix = "s@"
@@ -13,15 +12,12 @@ client.on("message", (message) => {
   
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  client.user.setActivity("sd!help | v0.0.3a");   
+  client.user.setActivity("s!help | v0.0.3a");   
 });
 
 client.on("message", async message => {
 const args = message.content.slice(prefix.length).trim().split(/ +/g);
 
-if (talkedRecently.has(message.author.id)) {
-    message.channel.send("Wait 15 seconds before typing this again. - " + message.author);
-} else {
     
     if (message.content === prefix+'help') {
         message.reply(  "\n " +
@@ -81,13 +77,6 @@ if (talkedRecently.has(message.author.id)) {
     		message.reply("The coin landed on tails");
     	}
     }
-
-    talkedRecently.add(message.author.id);
-    setTimeout(() => {
-      // Removes the user from the set after a minute
-      talkedRecently.delete(message.author.id);
-    }, 5000);
-}
 });
 
 function resetBot(channel) {
