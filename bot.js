@@ -69,7 +69,7 @@ client.on("message", async message => {
           message.reply("The coin landed on heads");
         } else if (result == 2) {
           message.reply("The coin landed on tails");
-        }
+        }}
 
       });
 
