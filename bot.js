@@ -13,7 +13,7 @@ client.on("message", async message => {
       let cont = message.content.slice(prefix.length).split(" ");
       let args = cont.slice(1);
 
-      if (command == "help") { // creates a command *help
+      if (message.content === prefix + 'help') { // creates a command *help
         var embedhelpmember = new Discord.RichEmbed() // sets a embed box to the variable embedhelpmember
           .setTitle("**List of Commands**\n") // sets the title to List of Commands
           .addField(" - help", "Displays this message (Correct usage: s!help)") // sets the first field to explain the command *help
@@ -76,7 +76,7 @@ client.on("message", async message => {
     function resetBot(channel) {
       channel.send('Rebooting Sentry...')
         .then(message => client.destroy())
-        .then(() => client.login('NDQ0OTE5OTMwNTc2NDM3Mjg2.XThl-g.fDuDjpqzFiLjclROWhahsb277o4'));
+        .then(() => client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTiZDA.-byM11A904BZ815LWli-DvMAtNA'));
     }
 
-    client.login('NDQ0OTE5OTMwNTc2NDM3Mjg2.XThl-g.fDuDjpqzFiLjclROWhahsb277o4');
+    client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTiZDA.-byM11A904BZ815LWli-DvMAtNA');
