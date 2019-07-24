@@ -60,7 +60,7 @@ if (message.content === admprefix+'reset') {
 function resetBot(channel) {
     channel.send('Rebooting Sentry...')
     .then(message => client.destroy())
-    .then(() => client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTicgA.4gvBfUHR8pLhMwAdT8mfeyYavYU'));
+    .then(() => client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTidmQ.icuIMDsjDb_k7-Ge2Gz9gvH0qek'));
 }
 
-client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTicgA.4gvBfUHR8pLhMwAdT8mfeyYavYU');
+client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTidmQ.icuIMDsjDb_k7-Ge2Gz9gvH0qek');
