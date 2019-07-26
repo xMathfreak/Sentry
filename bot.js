@@ -42,7 +42,7 @@ if (message.content.startsWith(prefix + 'purge')) {
 
 
 if (message.content === prefix+'ping') {
-  message.channel.send(new Date().getTime() - message.createdTimestamp + " ms");
+  message.channel.send("Time taken: " + (new Date().getTime() - message.createdTimestamp) + " ms");
 }
 
 if (message.content === admprefix+'reset') {
@@ -60,7 +60,7 @@ if (message.content === admprefix+'reset') {
 function resetBot(channel) {
     channel.send('Rebooting Sentry...')
     .then(message => client.destroy())
-    .then(() => client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTidmQ.icuIMDsjDb_k7-Ge2Gz9gvH0qek'));
+    .then(() => client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTti7Q.-TZf3l76TxOu8nLSms9W-FZHxsw'));
 }
 
-client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTidmQ.icuIMDsjDb_k7-Ge2Gz9gvH0qek');
+client.login('NDI0MjcyOTIzNzYzODAyMTEy.XTti7Q.-TZf3l76TxOu8nLSms9W-FZHxsw');
