@@ -60,7 +60,7 @@ if (message.content === admprefix+'reset') {
 function resetBot(channel) {
     channel.send('Rebooting Sentry...')
     .then(message => client.destroy())
-    .then(() => client.login('process.env.BOT_TOKEN'));
+    .then(() => client.login(process.env.BOT_TOKEN));
 }
 
-client.login('process.env.BOT_TOKEN');
+client.login(process.env.BOT_TOKEN);
