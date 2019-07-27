@@ -78,7 +78,7 @@ function image(message, parts) {
   var search = parts.slice(1).join(" "); // Slices of the command part of the array ["!image", "cute", "dog"] ---> ["cute", "dog"] ---> "cute dog"
 
   var options = {
-      url: "https://google.com/search?q=" + search + "space&tbm=isch",
+      url: "https://google.com/search?q=" + search,
       method: "GET",
       headers: {
           "Accept": "text/html",
