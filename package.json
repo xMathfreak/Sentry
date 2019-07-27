@@ -1,14 +1,14 @@
 {
-  "name": "sentrybot",
-  "version": "1.0.0a",
-  "description": "In Development",
-  "main": "bot.js",
-  "scripts": {
-    "test": ""
-  },
-  "author": "Mathfreak",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^11.3.0"
-  }
+    "name": "sentrybot",
+    "version": "1.0.1",
+    "description": "still indev",
+    "main": "bot.js",
+    "author": "Mathfreak",
+    "dependencies": {
+        "cheerio": "^1.0.0-rc.3",
+        "discord.js": "^11.3.2",
+        "eslint": "^4.19.1",
+        "jshint": "^2.9.5",
+        "request": "^2.88.0"
+    }
 }
