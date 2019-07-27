@@ -78,7 +78,7 @@ function image(message, parts) {
   var search = parts.slice(1).join(" "); // Slices of the command part of the array ["!image", "cute", "dog"] ---> ["cute", "dog"] ---> "cute dog"
 
   var options = {
-      url: "https://imgur.com/search?q=" + search,
+      url: "https://api.imgur.com/3/gallery/search/?q=" + search,
       method: "GET",
       headers: {
           "Accept": "text/html",
@@ -108,7 +108,7 @@ function image(message, parts) {
       }
 
       // Send result
-      message.channel.send( urls[0] );
+      message.channel.send( urls[~~(Math.random() * 5)]  );
   });
 
 }
