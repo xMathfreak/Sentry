@@ -9,7 +9,7 @@
         "discord.js": "^11.3.2",
         "eslint": "^4.19.1",
         "jshint": "^2.9.5",
-        "request": "^2.88.0"
-        "google-images": "2.1.0"
+        "request": "^2.88.0",
+        "google-images": "^2.1.0"
     }
 }
