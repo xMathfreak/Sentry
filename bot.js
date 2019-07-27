@@ -4,6 +4,8 @@ const request = require("request");
 const client = new Discord.Client();
 const prefix = "s!"
 const admprefix = "s@"
+
+var client_id = "3ecf3733b8b0344";
   
 client.on('error', console.error);
 client.on('ready', () => {
@@ -82,7 +84,8 @@ function image(message, parts) {
       method: "GET",
       headers: {
           "Accept": "text/html",
-          "User-Agent": "Chrome"
+          "User-Agent": "Chrome",
+          "Authorization": 'Client-ID ' + client_id
       }
   };
   request(options, function(error, response, responseBody) {
