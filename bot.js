@@ -4,8 +4,6 @@ const request = require("request");
 const client = new Discord.Client();
 const prefix = "s!"
 const admprefix = "s@"
-
-var client_id = "3ecf3733b8b0344";
   
 client.on('error', console.error);
 client.on('ready', () => {
@@ -80,12 +78,11 @@ function image(message, parts) {
   var search = parts.slice(1).join(" "); // Slices of the command part of the array ["!image", "cute", "dog"] ---> ["cute", "dog"] ---> "cute dog"
 
   var options = {
-      url: "https://api.imgur.com/3/gallery/search/?q=" + search,
+      url: "http://results.dogpile.com/serp?qc=images&q=" + search,
       method: "GET",
       headers: {
           "Accept": "text/html",
-          "User-Agent": "Chrome",
-          "Authorization": 'Client-ID ' + client_id
+          "User-Agent": "Chrome"
       }
   };
   request(options, function(error, response, responseBody) {
