@@ -5,6 +5,11 @@ module.exports = {
   init : {
     delete : false,
     channel : null,
+    help: {
+      name : "Image Search",
+      description : "Sends an image based on inserted parameters.",
+      usage : "`s!img [parameters]`"
+    },
     execute : async function(message, args){
       
       image(message, message.content.split(" "));
@@ -39,6 +44,13 @@ function image(message, parts){
       return;
     }
 
-    message.channel.send( urls[~~(Math.random() * urls.length)]  );
+    imageURL = urls[~~(Math.random() * urls.length)]
+    message.channel.send({embed : {
+      "title" : "Image Link",
+      "url" : imageURL,
+      "image": {
+        "url" : `${imageURL}`
+      }
+    }});
   });
 }
