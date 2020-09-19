@@ -15,4 +15,4 @@ client.on("message", async message => {
   manager.executeCommand(message, prefix);
 });
 
-client.login("process.env.BOT_TOKEN");
+client.login(process.env.BOT_TOKEN);
