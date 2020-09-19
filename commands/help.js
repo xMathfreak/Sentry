@@ -2,6 +2,7 @@ const manager = require("./manager");
 
 module.exports = {
   init : {
+    aliases : ["?"],
     help : {
       name : "Help",
       description : "Displays all available commands or Displays information about a specified command",
