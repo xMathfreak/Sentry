@@ -1,7 +1,5 @@
 module.exports = {
   init : {
-    delete : false,
-    channel : null,
     help: {
       name : "Purge",
       description : "Deletes a specified number of messages.",
