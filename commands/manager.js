@@ -27,7 +27,7 @@ module.exports = {
 
     commands.forEach(async function(value, key, map){
       if (key==command || (value && value.aliases && value.aliases.includes(command))){
-        value.execute(message, args).catch(error => console.error(error));
+        value.execute(message, args)
       }
     });
   }
