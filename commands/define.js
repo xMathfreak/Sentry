@@ -31,7 +31,7 @@ function getDefinition(message, args){
     if (error) return;
 
     var data = JSON.parse(responseBody);
-    console.log(data);
+    
     if (!data || !data[0]){return message.channel.send("**❌ There was an error getting the definition**");}
     
     message.channel.send({embed : {
