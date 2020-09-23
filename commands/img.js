@@ -9,8 +9,8 @@ module.exports = {
       usage : "`s!img [parameters]`"
     },
     aliases : ["searchimage", "findimage", "imagesearch", "image"],
-    execute : async function(message, args){
-      imageSearch(message, args);
+    execute : async function(message){
+      imageSearch(message, message.content.split(" "));
     }
   }
 }
