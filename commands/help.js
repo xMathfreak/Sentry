@@ -25,7 +25,7 @@ module.exports = {
       else
       {
         manager.commands.forEach(async function(value, key, map){
-          if (key==args[0]){
+          if (key==args[0] || (value && value.aliases && value.aliases.includes(args[0]))){
             message.channel.send({
               embed : {
                 color : 16777215,

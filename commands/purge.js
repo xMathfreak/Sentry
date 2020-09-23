@@ -11,19 +11,19 @@ module.exports = {
         message.delete();
     
         if (!message.member.hasPermission(['MANAGE_MESSAGES'])) {
-          message.channel.send('You do not have permission to use this command')
+          message.channel.send('**❌ You do not have permission to use this command**')
             .then(message => {message.delete(2000);}).catch();
           return;
         }
 
         if (args[0] <= 0){
-          message.channel.send('Please input a number greater than 0')
+          message.channel.send('**❌ Please input a number greater than 0**')
             .then(message => {message.delete(2000);}).catch();
           return;
         }
     
         if (isNaN(args[0])) {
-          message.channel.send('Please input a number')
+          message.channel.send('**❌ Please input a number**')
             .then(message => {message.delete(2000);}).catch();
           return;
         }

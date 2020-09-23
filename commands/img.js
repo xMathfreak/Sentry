@@ -8,9 +8,9 @@ module.exports = {
       description : "Returns an image based on inserted parameters",
       usage : "`s!img [parameters]`"
     },
-    aliases : ["searchimage", "findimage", "imagesearch"],
-    execute : async function(message){
-      imageSearch(message, message.content.split(" "));
+    aliases : ["searchimage", "findimage", "imagesearch", "image"],
+    execute : async function(message, args){
+      imageSearch(message, args);
     }
   }
 }
@@ -33,7 +33,7 @@ function imageSearch(message, parts){
     var links = $(".image a.link");
     var urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
 
-    if (!urls.length) return;
+    if (!urls.length) return message.channel.send("**❌ Couldn't find any images based on the provided parameters**").then(message => {message.delete(2000);}).catch();
 
     imageURL = urls[~~(Math.random() * urls.length)]
     message.channel.send({embed : {
