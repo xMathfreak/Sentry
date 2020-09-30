@@ -1,6 +1,5 @@
 const {
-  splitMessage,
-  escapeMarkdown
+  splitMessage
 } = require('discord.js');
 const ytdl = require('ytdl-core');
 const queue = new Map();
@@ -49,7 +48,7 @@ module.exports = {
       url: songInfo.videoDetails.video_url,
       thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
       author: songInfo.videoDetails.author.name,
-      duration: formatSeconds(songInfo.videoDetails.lengthSeconds),
+      duration: songInfo.videoDetails.lengthSeconds,
       requestedBy: (message.author.username + "#" + message.author.discriminator),
       requestAvatar: message.author.avatarURL()
     };
@@ -89,7 +88,7 @@ module.exports = {
               },
               {
                 name: "Song Duration",
-                value: `${queueConst.songs[0].duration}`,
+                value: `${formatSeconds(queueConst.songs[0].duration)}`,
                 inline: true
               }
             ]
@@ -127,7 +126,7 @@ module.exports = {
             },
             {
               name: "Song Duration",
-              value: `${song.duration}`,
+              value: `${formatSeconds(song.duration)}`,
               inline: true
             }
           ]
@@ -135,6 +134,7 @@ module.exports = {
       });
     }
   },
+
   stop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
@@ -151,7 +151,10 @@ module.exports = {
 
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
+
+    message.channel.send("⏹ **Stopped all tracks**");
   },
+
   skip: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
@@ -166,7 +169,9 @@ module.exports = {
     });
 
     serverQueue.connection.dispatcher.end();
+    message.channel.send("⏩ **Skipped**");
   },
+
   nowPlaying: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
@@ -201,13 +206,14 @@ module.exports = {
           },
           {
             name: "Song Duration",
-            value: `${serverQueue.songs[0].duration}`,
+            value: `${formatSeconds(serverQueue.songs[0].duration)}`,
             inline: true
           }
         ]
       }
     });
   },
+
   queue: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
@@ -221,7 +227,7 @@ module.exports = {
       });
     });
 
-    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${song.duration} Requested by: ${song.requestedBy}\``));
+    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${song.requestedBy}\``));
     if (!description[1]) return this.nowPlaying(message);
 
     description.shift();
@@ -239,7 +245,7 @@ module.exports = {
           title: `Queue for ${message.guild.name}`,
           fields: [{
               name: "Now Playing:",
-              value: (`${currentSong.title} | \`${currentSong.duration} Requested by: ${currentSong.requestedBy}\``)
+              value: (`${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requestedBy}\``)
             },
             {
               name: "Up next:",
