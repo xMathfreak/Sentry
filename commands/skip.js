@@ -7,6 +7,7 @@ module.exports = {
     description: "Skips the current song",
     usage: "`s!skip`"
   },
+  category: "music",
   execute: async function (message) {
     player.skip(message);
   }

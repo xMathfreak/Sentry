@@ -7,6 +7,7 @@ module.exports = {
     description: "Stops all songs in the queue",
     usage: "`s!stop`"
   },
+  category:"music",
   execute: async function (message) {
     player.stop(message);
   }

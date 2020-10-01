@@ -7,6 +7,7 @@ module.exports = {
     description: "Searches for the definition of a word",
     usage: "`s!define [parameter]`"
   },
+  category: "search",
   aliases: ["wordsearch", "definition"],
   execute: async function (message, args) {
     getDefinition(message, args);

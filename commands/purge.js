@@ -5,6 +5,7 @@ module.exports = {
     description: "Deletes a specified number of messages.",
     usage: "`s!purge [number]`"
   },
+  category: "moderation",
   execute: async function (message, args) {
 
     async function purge() {

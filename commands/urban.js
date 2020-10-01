@@ -7,6 +7,7 @@ module.exports = {
     description: "Searches up a word from Urban Dictionary",
     usage: "`s!urban [parameters]`"
   },
+  category: "search",
   aliases: ["urbandict", "urbandictionary", "udict", "udictionary", "urbansearch"],
   execute: async function (message, args) {
     getUrbanDefinition(message, args);

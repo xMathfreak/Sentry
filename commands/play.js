@@ -8,6 +8,7 @@ module.exports = {
     description: "Plays a song in a voice channel",
     usage: "`s!play [parameters]`"
   },
+  category: "music",
   execute: async function (message, args) {
     player.play(message, args);
   }

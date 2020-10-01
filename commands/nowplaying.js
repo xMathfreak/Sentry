@@ -8,6 +8,7 @@ module.exports = {
     description: "Gets the song that is playing",
     usage: "`s!nowplaying`"
   },
+  category: "music",
   execute: async function (message) {
     player.nowPlaying(message);
   }

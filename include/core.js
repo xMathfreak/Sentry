@@ -1,20 +1,16 @@
 const fs = require('fs');
 var commands = new Map();
-var commandNames = new Array;
 
 fs.readdir('./commands', (err, files) => {
   files.forEach(file => {
     var importedCommandParams = require(`../commands/${file}`);
     const commandName = importedCommandParams.name;
-    commandNames.push(`${"`" + commandName + "`"}`);
     commands.set(commandName, importedCommandParams);
-
   });
 });
 
 module.exports = {
   commands : commands,
-  commandNames : commandNames,
   executeCommand : async function(message, prefix){
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;

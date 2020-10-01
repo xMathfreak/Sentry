@@ -8,6 +8,7 @@ module.exports = {
     description: "Returns an image based on inserted parameters",
     usage: "`s!img [parameters]`"
   },
+  category: "search",
   aliases: ["searchimage", "findimage", "imagesearch", "img"],
   execute: async function (message) {
     imageSearch(message, message.content.split(" "));

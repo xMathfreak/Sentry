@@ -8,6 +8,7 @@ module.exports = {
     description: "Shows the music queue",
     usage: "`s!queue`"
   },
+  category:"music",
   execute: async function (message) {
     player.queue(message);
   }
