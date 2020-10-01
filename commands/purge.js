@@ -31,7 +31,7 @@ module.exports = {
       }
       
       if (args[0] > 100) {
-        message.channel.send('**❌ Please input a number less than**')
+        message.channel.send('**❌ Please input a number less than 100**')
           .then(message => {
             message.delete({
               timeout: 6000
