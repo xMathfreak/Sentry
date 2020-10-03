@@ -262,6 +262,9 @@ async function playSong(guild, song) {
       serverQueue.songs.shift();
       playSong(guild, serverQueue.songs[0]);
     })
+    .on('disconnect', () => {
+      queue.delete(guild.id);
+    })
     .on('error', error => {
       console.error(error);
       serverQueue.voiceChannel.leave();
