@@ -1,57 +1,75 @@
 const {
   splitMessage
 } = require('discord.js');
+const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
+const youtube = new YoutubeAPI('AIzaSyDX7RXfbLdsJNAMecHCxlLm7fdyqHWUpIU');
 const queue = new Map();
 
 module.exports = {
   play: async function (message, args) {
+    const search = args.join(' ');
+    const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
+    const playlistRegex = /^.*(list=)([^#\&\?]*).*/gi;
+
     let serverQueue = queue.get(message.guild.id);
     let vc = message.member.voice;
 
-    if (!vc.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
-
-    if (!args[0]) return message.channel.send("**❌ You need to specify a link to play**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
-
-    let url = args.join(' ');
-    if (!url.match(/(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/)) return message.channel.send("**❌ Invalid Youtube Link**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
-
+    const url = args[0];
+    const urlValid = ytRegex.test(url);
     const permissions = vc.channel.permissionsFor(message.guild.me);
 
-    if (!permissions.has('CONNECT')) return message.channel.send("**❌ I do not have permission to connect to your voice chat**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!vc.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!url) return message.channel.send("**❌ You need to search for something to play**");
+    if (!permissions.has('CONNECT')) return message.channel.send("**❌ I do not have permission to connect to your voice chat**");
+    if (!permissions.has('SPEAK')) return message.channel.send("**❌ I do not have permission to speak in your voice chat**");
 
-    if (!permissions.has('SPEAK')) return message.channel.send("**❌ I do not have permission to speak in your voice chat**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
 
-    let songInfo = await ytdl.getInfo(url);
-    let song = {
-      title: songInfo.videoDetails.title,
-      url: songInfo.videoDetails.video_url,
-      thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
-      author: songInfo.videoDetails.author.name,
-      duration: songInfo.videoDetails.lengthSeconds,
-      requestedBy: (message.author.username + "#" + message.author.discriminator),
-      requestAvatar: message.author.avatarURL()
-    };
+    let song = null;
+    let songInfo = null;
+
+    if (urlValid) {
+      try {
+        songInfo = await ytdl.getInfo(url);
+        song = {
+          title: songInfo.videoDetails.title,
+          url: songInfo.videoDetails.video_url,
+          thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
+          author: songInfo.videoDetails.author.name,
+          duration: songInfo.videoDetails.lengthSeconds,
+          requestedBy: `${message.author.username}#${message.author.discriminator}`,
+          requestAvatar: message.author.avatarURL()
+        };
+      } catch (error) {
+        console.log(error);
+        return message.channel.send("**❌ There was an error playing the song**").then(message => {
+          message.delete({
+            timeout: 6000
+          });
+        });
+      }
+    } else {
+      try {
+        const results = await youtube.searchVideos(search, 1);
+        songInfo = await ytdl.getInfo(results[0].url);
+        song = {
+          title: songInfo.videoDetails.title,
+          url: songInfo.videoDetails.video_url,
+          thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
+          author: songInfo.videoDetails.author.name,
+          duration: songInfo.videoDetails.lengthSeconds,
+          requestedBy: `${message.author.username}#${message.author.discriminator}`,
+          requestAvatar: message.author.avatarURL()
+        };
+      } catch (error) {
+        console.log(error);
+        return message.channel.send("**❌ There was an error playing the song**").then(message => {
+          message.delete({
+            timeout: 6000
+          });
+        });
+      }
+    }
 
     if (!serverQueue) {
       let queueConst = {
@@ -137,17 +155,9 @@ module.exports = {
 
   stop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
-    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
 
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
 
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
@@ -157,16 +167,8 @@ module.exports = {
 
   skip: async function (message) {
     const serverQueue = queue.get(message.guild.id);
-    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
-    if (!serverQueue) return message.channel.send("**❌ There is no song to skip**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue) return message.channel.send("**❌ There is no song to skip**");
 
     serverQueue.connection.dispatcher.end();
     message.channel.send("⏩ **Skipped**");
@@ -174,17 +176,9 @@ module.exports = {
 
   nowPlaying: async function (message) {
     const serverQueue = queue.get(message.guild.id);
-    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
 
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
 
     return message.channel.send({
       embed: {
@@ -216,16 +210,8 @@ module.exports = {
 
   queue: async function (message) {
     const serverQueue = queue.get(message.guild.id);
-    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
-    if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    });
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**");
 
     const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${song.requestedBy}\``));
     if (!description[1]) return this.nowPlaying(message);
@@ -293,6 +279,12 @@ async function playSong(guild, song) {
 
 if (!Array.prototype.last) {
   Array.prototype.last = function () {
+    return this[this.length - 1];
+  };
+};
+
+if (!Object.prototype.last) {
+  Object.prototype.last = function () {
     return this[this.length - 1];
   };
 };
