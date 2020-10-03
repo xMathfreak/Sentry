@@ -3,7 +3,7 @@ const {
 } = require('discord.js');
 const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
-const youtube = new YoutubeAPI('AIzaSyDX7RXfbLdsJNAMecHCxlLm7fdyqHWUpIU');
+const youtube = new YoutubeAPI('token');
 const queue = new Map();
 
 module.exports = {
