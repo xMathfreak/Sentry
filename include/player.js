@@ -1,6 +1,4 @@
-const {
-  splitMessage
-} = require('discord.js');
+const { splitMessage, MessageEmbed } = require('discord.js');
 const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
 const youtube = new YoutubeAPI(process.env.YOUTUBE_API_KEY);
@@ -37,20 +35,16 @@ module.exports = {
           thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
           author: songInfo.videoDetails.author.name,
           duration: songInfo.videoDetails.lengthSeconds,
-          requestedBy: `${message.author.username}#${message.author.discriminator}`,
-          requestAvatar: message.author.avatarURL()
+          requestedBy: message.author
         };
       } catch (error) {
         console.log(error);
-        return message.channel.send("**❌ There was an error playing the song**").then(message => {
-          message.delete({
-            timeout: 6000
-          });
-        });
+        return message.channel.send("**❌ There was an error playing the song**");
       }
     } else {
       try {
         const results = await youtube.searchVideos(search, 1);
+        if (!results[0]) return message.channel.send("**❌ Song not found**");
         songInfo = await ytdl.getInfo(results[0].url);
         song = {
           title: songInfo.videoDetails.title,
@@ -58,16 +52,11 @@ module.exports = {
           thumbnail: songInfo.videoDetails.thumbnail.thumbnails.last().url,
           author: songInfo.videoDetails.author.name,
           duration: songInfo.videoDetails.lengthSeconds,
-          requestedBy: `${message.author.username}#${message.author.discriminator}`,
-          requestAvatar: message.author.avatarURL()
+          requestedBy: message.author
         };
       } catch (error) {
         console.log(error);
-        return message.channel.send("**❌ There was an error playing the song**").then(message => {
-          message.delete({
-            timeout: 6000
-          });
-        });
+        return message.channel.send("**❌ There was an error playing the song**");
       }
     }
 
@@ -97,7 +86,7 @@ module.exports = {
             },
             author: {
               name: "Added to queue",
-              icon_url: `${queueConst.songs[0].requestAvatar}`
+              icon_url: `${queueConst.songs[0].requestedBy.avatarURL()}`
             },
             fields: [{
                 name: "Channel",
@@ -118,11 +107,7 @@ module.exports = {
         console.log(error);
         queue.delete(message.guild.id);
         serverQueue.voiceChannel.leave()
-        return message.channel.send("**❌ There was an error playing the song**").then(message => {
-          message.delete({
-            timeout: 6000
-          });
-        });
+        return message.channel.send("**❌ There was an error playing the song**");
       }
     } else {
       serverQueue.songs.push(song);
@@ -135,7 +120,7 @@ module.exports = {
           },
           author: {
             name: "Added to queue",
-            icon_url: `${song.requestAvatar}`
+            icon_url: `${song.requestedBy.avatarURL()}`
           },
           fields: [{
               name: "Channel",
@@ -191,7 +176,7 @@ module.exports = {
           name: "Now Playing ♫"
         },
         footer: {
-          text: "Requested by: " + serverQueue.songs[0].requestedBy
+          text: `Requested by: ${serverQueue.songs[0].requestedBy.username}#${serverQueue.songs[0].requestedBy.discriminator}`
         },
         fields: [{
             name: "Channel",
@@ -213,33 +198,27 @@ module.exports = {
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**");
 
-    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${song.requestedBy}\``));
+    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${serverQueue.songs[0].requestedBy.username}#${serverQueue.songs[0].requestedBy.discriminator}\``));
     if (!description[1]) return this.nowPlaying(message);
-
     description.shift();
+
+    const currentSong = serverQueue.songs[0];
+
+    let queueEmbed = new MessageEmbed()
+      .setTitle(`Queue for ${message.guild.name}`)
+      .addField("Now Playing", `${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requestedBy.username}#${currentSong.requestedBy.discriminator}\``);
+
+
     const splitDescription = splitMessage(description, {
       maxLength: 1824,
       char: "\n",
       prepend: "",
       append: ""
     });
-    const currentSong = serverQueue.songs[0];
-
-    splitDescription.forEach(async (m) => {
-      message.channel.send({
-        embed: {
-          title: `Queue for ${message.guild.name}`,
-          fields: [{
-              name: "Now Playing:",
-              value: (`${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requestedBy}\``)
-            },
-            {
-              name: "Up next:",
-              value: `${m}`
-            }
-          ]
-        }
-      })
+    
+    splitDescription.forEach(async m => {
+      queueEmbed.addField("Up next:", m);
+      message.channel.send(queueEmbed);
     });
   }
 }
