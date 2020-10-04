@@ -162,7 +162,6 @@ module.exports = {
   nowPlaying: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
 
     return message.channel.send({
@@ -215,11 +214,52 @@ module.exports = {
       prepend: "",
       append: ""
     });
-    
+
     splitDescription.forEach(async m => {
       queueEmbed.addField("Up next:", m);
       message.channel.send(queueEmbed);
     });
+  },
+
+  pause: async function (message) {
+    const serverQueue = queue.get(message.guild.id);
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+
+    if (serverQueue.playing) {
+      serverQueue.playing = false;
+      serverQueue.connection.dispatcher.pause(true);
+      return message.channel.send("⏸ Paused the music");
+    }
+  },
+
+  resume: async function (message) {
+    const serverQueue = queue.get(message.guild.id);
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+
+    if (!serverQueue.playing) {
+      serverQueue.playing = true;
+      serverQueue.connection.dispatcher.resume();
+      return message.channel.send("▶ Resumed the music");
+    }
+
+    return message.channel.send("**❌ The queue was not paused**");
+  },
+
+  remove: async function (message, args) {
+    const serverQueue = queue.get(message.guild.id);
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    
+    if (!args.length) return message.channel.send("**❌ You need to insert a position in the queue**");
+    if (isNaN(args[0])) return message.channel.send("**❌ You need to specify a number**");
+
+    if (args[0]>serverQueue.songs.length-1) return message.channel.send("**❌ You need to specify a number in the queue**");
+    if (message.author!=serverQueue.songs[args[0]].requestedBy || !message.member.hasPermission(['ADMINISTRATOR'])) return message.channel.send("**❌ You cannot remove a song you did not add**");
+    
+    const song = serverQueue.songs.splice(args[0], 1);
+    message.channel.send(`❎ ${song[0].title} was removed from the queue`);
   }
 }
 
