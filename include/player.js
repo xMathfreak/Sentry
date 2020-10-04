@@ -1,6 +1,7 @@
 const { splitMessage, MessageEmbed } = require('discord.js');
 const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
+const ytdlDiscord = require('ytdl-core-discord');
 const youtube = new YoutubeAPI(process.env.YOUTUBE_API_KEY);
 const queue = new Map();
 
@@ -251,13 +252,13 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
-    
+
     if (!args.length) return message.channel.send("**❌ You need to insert a position in the queue**");
     if (isNaN(args[0])) return message.channel.send("**❌ You need to specify a number**");
 
-    if (args[0]>serverQueue.songs.length-1) return message.channel.send("**❌ You need to specify a number in the queue**");
-    if (message.author!=serverQueue.songs[args[0]].requestedBy || !message.member.hasPermission(['ADMINISTRATOR'])) return message.channel.send("**❌ You cannot remove a song you did not add**");
-    
+    if (args[0] > serverQueue.songs.length - 1) return message.channel.send("**❌ You need to specify a number in the queue**");
+    if (message.author != serverQueue.songs[args[0]].requestedBy || !message.member.hasPermission(['ADMINISTRATOR'])) return message.channel.send("**❌ You cannot remove a song you did not add**");
+
     const song = serverQueue.songs.splice(args[0], 1);
     message.channel.send(`❎ ${song[0].title} was removed from the queue`);
   }
@@ -272,11 +273,13 @@ async function playSong(guild, song) {
     return;
   }
 
-  const dispatcher = serverQueue.connection.play(ytdl(song.url, {
+  const dispatcher = serverQueue.connection.play(await ytdlDiscord(song.url, {
       quality: 'highestaudio',
       highWaterMark: 1 << 25,
       filter: "audioonly"
-    }))
+    }), {
+      type: 'opus'
+    })
     .on('finish', () => {
       serverQueue.songs.shift();
       playSong(guild, serverQueue.songs[0]);
