@@ -20,9 +20,9 @@ module.exports = {
 
     if (!vc.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!url) return message.channel.send("**❌ You need to search for something to play**");
-    if (!permissions.has('CONNECT')) return message.channel.send("**❌ I do not have permission to connect to your voice chat**");
-    if (!permissions.has('SPEAK')) return message.channel.send("**❌ I do not have permission to speak in your voice chat**");
-
+    if (!permissions.has('CONNECT')) return message.channel.send("**❌ I do not have permission to connect to your voice channel**");
+    if (!permissions.has('SPEAK')) return message.channel.send("**❌ I do not have permission to speak in your voice channel**");
+    if (serverQueue && vc.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     let song = null;
     let songInfo = null;
@@ -142,8 +142,8 @@ module.exports = {
   stop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
@@ -155,6 +155,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is no song to skip**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     serverQueue.connection.dispatcher.end();
     message.channel.send("⏩ **Skipped**");
@@ -164,6 +165,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     return message.channel.send({
       embed: {
@@ -197,6 +199,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${serverQueue.songs[0].requestedBy.username}#${serverQueue.songs[0].requestedBy.discriminator}\``));
     if (!description[1]) return this.nowPlaying(message);
@@ -226,6 +229,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (serverQueue.playing) {
       serverQueue.playing = false;
@@ -238,6 +242,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (!serverQueue.playing) {
       serverQueue.playing = true;
@@ -252,6 +257,7 @@ module.exports = {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (!args.length) return message.channel.send("**❌ You need to insert a position in the queue**");
     if (isNaN(args[0])) return message.channel.send("**❌ You need to specify a number**");
