@@ -19,7 +19,7 @@ function getDefinition(message, args) {
   if (!args[0]) return message.channel.send("**❌ You need to specify a word to search for!**");
 
   var options = {
-    url: "https://api.dictionaryapi.dev/api/v2/entries/en/" + args,
+    url: "https://api.dictionaryapi.dev/api/v2/entries/en/"+args,
     method: "GET",
     headers: {
       "Accept": "text/html",
