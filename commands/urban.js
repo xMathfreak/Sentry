@@ -15,11 +15,7 @@ module.exports = {
 }
 
 function getUrbanDefinition(message, args) {
-  if (!args[0]) {
-    return message.channel.send("**❌ You need to specify a word to search for!**").then(message => {
-      message.delete(6000);
-    }).catch();
-  }
+  if (!args[0]) return message.channel.send("**❌ You need to specify a word to search for!**");
 
   var options = {
     url: "http://api.urbandictionary.com/v0/define?term=" + args,
@@ -35,20 +31,8 @@ function getUrbanDefinition(message, args) {
 
     var data = JSON.parse(responseBody);
 
-    if (!data) {
-      return message.channel.send("**❌ There was an error getting the definition**").then(message => {
-        message.delete({
-          timeout: 6000
-        });
-      }).catch();
-    }
-    if (!data.list[0]) {
-      return message.channel.send("**❌ The word couldnt be found**").then(message => {
-        message.delete({
-          timeout: 6000
-        });
-      }).catch();
-    }
+    if (!data) return message.channel.send("**❌ There was an error getting the definition**");
+    if (!data.list[0]) return message.channel.send("**❌ The word couldnt be found**");
 
     message.channel.send({
       embed: {
@@ -61,7 +45,10 @@ function getUrbanDefinition(message, args) {
             "name": "Definition",
             value: `${data.list[0].definition}`
           }
-        ]
+        ],
+        footer: {
+          text: `Requested by: ${message.author.tag}`
+        }
       }
     });
   });

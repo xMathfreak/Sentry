@@ -1,4 +1,5 @@
-﻿const request = require('request');
+﻿const { splitMessage, MessageEmbed } = require('discord.js');
+const request = require('request');
 
 module.exports = {
   name: "define",
@@ -15,13 +16,7 @@ module.exports = {
 }
 
 function getDefinition(message, args) {
-  if (!args[0]) {
-    return message.channel.send("**❌ You need to specify a word to search for!**").then(message => {
-      message.delete({
-        timeout: 6000
-      });
-    }).catch();
-  }
+  if (!args[0]) return message.channel.send("**❌ You need to specify a word to search for!**");
 
   var options = {
     url: "https://api.dictionaryapi.dev/api/v2/entries/en/" + args,
@@ -37,45 +32,39 @@ function getDefinition(message, args) {
 
     var data = JSON.parse(responseBody);
 
-    if (!data || !data[0]) {
-      return message.channel.send("**❌ There was an error getting the definition**").then(message => {
-        message.delete({
-          timeout: 6000
-        });
-      }).catch();
-    }
-
-    var meaningsArr = data[0].meanings;
+    if (!data || !data[0]) return message.channel.send("**❌ There was an error getting the definition**");
     var definitionString = '';
 
-    for (var definitions in meaningsArr) {
-      if (meaningsArr.hasOwnProperty(definitions)) {
+    for (var definitions in data[0].meanings) {
+      if (data[0].meanings.hasOwnProperty(definitions)) {
         var meaningIndex = parseInt(definitions) + 1;
-        var definitionsArr = meaningsArr[definitions].definitions;
+        var definitionsArr = data[0].meanings[definitions].definitions;
 
         for (var definition in definitionsArr) {
           if (definitionsArr.hasOwnProperty(definition)) {
             var definitionIndex = parseInt(definition) + 1;
-            definitionString = definitionString.concat(`${"**[" + meaningIndex + "-" + definitionIndex + "]** "}`, meaningsArr[definitions].definitions[definition].definition, `\n`);
+            definitionString = definitionString.concat(`${"**[" + meaningIndex + "-" + definitionIndex + "]** "}`, data[0].meanings[definitions].definitions[definition].definition, `\n`);
           }
         }
       }
     }
 
-    message.channel.send({
-      embed: {
-        title: "",
-        fields: [{
-            "name": "Word",
-            "value": `${data[0].word}`
-          },
-          {
-            "name": "Definitions",
-            value: `${definitionString}`
-          }
-        ]
-      }
+    let defEmbed = new MessageEmbed()
+      .setTitle("")
+      .addField("Word", `${data[0].word}`)
+      .addField("Definitions", "** **")
+      .setFooter(`Requested by: ${message.author.tag}`);
+
+    const splitDefinition = splitMessage(definitionString, {
+      maxLength: 1000,
+      char: "\n",
+      prepend: "",
+      append: ""
     });
 
+    splitDefinition.forEach(async m => {
+      defEmbed.addField("** **", m);
+    });
+    message.channel.send(defEmbed);
   });
 }
