@@ -178,7 +178,7 @@ module.exports = {
           name: "Now Playing ♫"
         },
         footer: {
-          text: `Requested by: ${serverQueue.songs[0].requestedBy.username}#${serverQueue.songs[0].requestedBy.discriminator}`
+          text: `Requested by: ${serverQueue.songs[0].requestedBy.tag}`
         },
         fields: [{
             name: "Channel",
@@ -201,7 +201,7 @@ module.exports = {
     if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**");
     if (serverQueue && message.member.voice.channel!=serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
-    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${serverQueue.songs[0].requestedBy.username}#${serverQueue.songs[0].requestedBy.discriminator}\``));
+    const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${serverQueue.songs[0].requestedBy.tag}\``));
     if (!description[1]) return this.nowPlaying(message);
     description.shift();
 
@@ -209,7 +209,7 @@ module.exports = {
 
     let queueEmbed = new MessageEmbed()
       .setTitle(`Queue for ${message.guild.name}`)
-      .addField("Now Playing", `${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requestedBy.username}#${currentSong.requestedBy.discriminator}\``);
+      .addField("Now Playing", `${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requestedBy.tag}\``);
 
 
     const splitDescription = splitMessage(description, {
@@ -221,8 +221,8 @@ module.exports = {
 
     splitDescription.forEach(async m => {
       queueEmbed.addField("Up next:", m);
-      message.channel.send(queueEmbed);
     });
+    message.channel.send(queueEmbed);
   },
 
   pause: async function (message) {
