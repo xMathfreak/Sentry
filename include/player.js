@@ -213,7 +213,7 @@ module.exports = {
 
 
     const splitDescription = splitMessage(description, {
-      maxLength: 1824,
+      maxLength: 1000,
       char: "\n",
       prepend: "",
       append: ""
