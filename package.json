@@ -15,5 +15,8 @@
         "simple-youtube-api": "^5.2.1",
         "ytdl-core": "^3.3.0",
         "ytdl-core-discord": "^1.2.3"
+    },
+    "engines":{
+        "node": "12.13.x"
     }
 }
