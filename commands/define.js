@@ -53,7 +53,7 @@ function getDefinition(message, args) {
       .setTitle("")
       .addField("Word", `${data[0].word}`)
       .addField("Definitions", "** **")
-      .setFooter(`Requested by: ${message.author.tag}`);
+      .setFooter(`Requested by: ${message.author.tag}`)
 
     const splitDefinition = splitMessage(definitionString, {
       maxLength: 1000,
