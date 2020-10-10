@@ -9,7 +9,6 @@ module.exports = {
   play: async function (message, args) {
     const search = args.join(' ');
     const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
-    const playlistRegex = /^.*(list=)([^#\&\?]*).*/gi;
 
     let serverQueue = queue.get(message.guild.id);
     let vc = message.member.voice;
@@ -38,6 +37,7 @@ module.exports = {
           duration: songInfo.videoDetails.lengthSeconds,
           requestedBy: message.author
         };
+        if (song.duration > 10830) return message.channel.send("**❌ Cannot play a song that's longer than 3 hours**");
       } catch (error) {
         console.log(error);
         return message.channel.send("**❌ There was an error playing the song**");
@@ -55,6 +55,7 @@ module.exports = {
           duration: songInfo.videoDetails.lengthSeconds,
           requestedBy: message.author
         };
+        if (song.duration > 10830) return message.channel.send("**❌ Cannot play a song that's longer than 3 hours**");
       } catch (error) {
         console.log(error);
         return message.channel.send("**❌ There was an error playing the song**");
@@ -213,7 +214,7 @@ module.exports = {
 
 
     const splitDescription = splitMessage(description, {
-      maxLength: 1000,
+      maxLength: 1824,
       char: "\n",
       prepend: "",
       append: ""
