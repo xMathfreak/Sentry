@@ -1,4 +1,4 @@
-const { splitMessage, MessageEmbed } = require('discord.js');
+const { splitMessage, escapeMarkdown, MessageEmbed } = require('discord.js');
 const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
 const ytdlDiscord = require('ytdl-core-discord');
