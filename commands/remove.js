@@ -1,4 +1,4 @@
-const player = require('../include/player.js');
+const { remove } = require('../include/player.js');
 
 module.exports = {
   name: "remove",
@@ -9,6 +9,6 @@ module.exports = {
   },
   category: "music",
   execute: async function (message, args) {
-    player.remove(message, args);
+    remove(message, args);
   }
 }

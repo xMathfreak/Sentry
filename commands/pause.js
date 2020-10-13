@@ -1,4 +1,4 @@
-const player = require('../include/player.js');
+const { pause } = require('../include/player.js');
 
 module.exports = {
   name: "pause",
@@ -9,6 +9,6 @@ module.exports = {
   },
   category: "music",
   execute: async function (message) {
-    player.pause(message);
+    pause(message);
   }
 }

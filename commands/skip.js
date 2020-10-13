@@ -1,4 +1,4 @@
-const player = require('../include/player.js');
+const { skip } = require('../include/player.js');
 
 module.exports = {
   name: "skip",
@@ -9,6 +9,6 @@ module.exports = {
   },
   category: "music",
   execute: async function (message) {
-    player.skip(message);
+    skip(message);
   }
 }

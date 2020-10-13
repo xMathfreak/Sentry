@@ -1,4 +1,5 @@
-const core = require("../include/core.js");
+const { MessageEmbed } = require('discord.js');
+const { commands } = require('../include/core.js');
 
 module.exports = {
   name: "help",
@@ -38,41 +39,25 @@ module.exports = {
         }
       });
     } else {
-      core.commands.forEach(async function (value, key, map) {
-        if (key == args[0] || (value && value.aliases && value.aliases.includes(args[0]))) {
-          message.channel.send({
-            embed: {
-              color: 16777215,
-              fields: [{
-                  name: "Command Name",
-                  value: `${value.help.name}`
-                },
-                {
-                  name: "Description",
-                  value: `${value.help.description}`
-                },
-                {
-                  name: "Usage",
-                  value: `${value.help.usage}`
-                }
-              ]
-            }
-          });
+      commands.forEach(async (value, key)=>{
+        if (key==args[0] || (value && value.aliases && value.aliases.includes(args[0]))){
+          const commandHelpEmbed = new MessageEmbed()
+            .addField("Command Name", value.help.name)
+            .addField("Description", value.help.description)
+            .addField("Usage", value.help.usage);
+          message.channel.send(commandHelpEmbed)
         }
       });
     }
-
   }
-
 }
 
 function getCategory(category){
   const array = new Array();
-  core.commands.forEach((value) => {
+  commands.forEach((value) => {
     if(value.category && value.category==category){
-      array.push("`"+value.name+"`");
+      array.push(`\`${value.name}\``);
     }
   });
-
   return array;
 }

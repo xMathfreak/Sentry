@@ -1,4 +1,4 @@
-const player = require('../include/player.js');
+const { resume } = require('../include/player.js');
 
 module.exports = {
   name: "resume",
@@ -9,6 +9,6 @@ module.exports = {
   },
   category: "music",
   execute: async function (message) {
-    player.resume(message);
+    resume(message);
   }
 }
