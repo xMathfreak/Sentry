@@ -45,14 +45,15 @@ module.exports = {
         return message.channel.send("**❌ There was an error playing the song**");
       }
     }
-
+    
     song = {
       title: songInfo.videoDetails.title,
       url: songInfo.videoDetails.video_url,
       duration: songInfo.videoDetails.lengthSeconds,
       thumbnail: songInfo.videoDetails.thumbnail.thumbnails[songInfo.videoDetails.thumbnail.thumbnails.length - 1].url,
       author: songInfo.videoDetails.author.name,
-      requester: message.author
+      requester: message.author,
+      looping: false
     };
 
     if (song.duration >= 10830) return message.channel.send("**❌ Cannot play a song longer than 3 hours**");
@@ -63,13 +64,13 @@ module.exports = {
         voiceChannel: vc.channel,
         connection: null,
         songs: [],
-        volume: 10,
+        volume: 100,
         playing: true
       };
 
       queue.set(message.guild.id, queueConstruct);
       queueConstruct.songs.push(song);
-
+      
       try {
         let connection = await vc.channel.join();
         queueConstruct.connection = connection;
@@ -101,7 +102,7 @@ module.exports = {
       }
     } else {
       serverQueue.songs.push(song);
-
+      
       const playEmbed = new MessageEmbed()
         .setTitle(escapeMarkdown(song.title))
         .setURL(song.url)
@@ -124,7 +125,7 @@ module.exports = {
   stop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is nothing playing**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     serverQueue.songs = [];
@@ -136,7 +137,7 @@ module.exports = {
   skip: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is no song to skip**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is no song to skip**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     serverQueue.connection.dispatcher.end();
@@ -146,7 +147,7 @@ module.exports = {
   nowPlaying: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is nothing playing**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     nowPlayingEmbed = new MessageEmbed()
@@ -171,7 +172,7 @@ module.exports = {
   queue: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There are no songs in the queue**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There are no songs in the queue**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     const description = serverQueue.songs.map((song, index) => (`\`${index}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${serverQueue.songs[0].requester.tag}\``));
@@ -201,7 +202,7 @@ module.exports = {
   pause: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is nothing playing**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (serverQueue.playing) {
@@ -214,7 +215,7 @@ module.exports = {
   resume: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is nothing playing**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (!serverQueue.playing) {
@@ -229,7 +230,7 @@ module.exports = {
   remove: async function (message, args) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
-    if (!serverQueue) return message.channel.send("**❌ There is nothing playing**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There is nothing playing**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
 
     if (!args.length) return message.channel.send("**❌ You need to insert a position in the queue**");
@@ -240,6 +241,35 @@ module.exports = {
 
     const song = serverQueue.songs.splice(args[0], 1);
     message.channel.send(`❎ ${song[0].title} was removed from the queue`);
+  },
+
+  volume: async function (message, args) {
+    const serverQueue = queue.get(message.guild.id);
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There are no songs in the queue**");
+    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
+    if (isNaN(args[0]) || !args[0]) return message.channel.send('**❌ Please input a number**');
+    if (args[0] <= 0 || args[0] > 100) return message.channel.send('**❌ Please input a number greater than 0 and less than 100**');
+
+    serverQueue.volume = args[0];
+    serverQueue.connection.dispatcher.setVolumeLogarithmic(args[0]/100);
+
+    message.channel.send(`**🔊 Volume set to ${args[0]}**`);
+  },
+
+  loop: async function (message) {
+    const serverQueue = queue.get(message.guild.id);
+    if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
+    if (!serverQueue || serverQueue.songs.length==0) return message.channel.send("**❌ There are no songs in the queue**");
+    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
+    
+    if (serverQueue.songs[0].looping){
+      serverQueue.songs[0].looping = false;
+      message.channel.send(`**🔂 Disabled!**`);
+    }else{
+      serverQueue.songs[0].looping = true;
+      message.channel.send(`**🔂 Enabled!**`);
+    }
   }
 }
 
@@ -260,7 +290,12 @@ async function playSong(guild, song) {
       type: 'opus'
     })
     .on('finish', () => {
-      serverQueue.songs.shift();
+      if (serverQueue.songs[0].looping){
+        serverQueue.songs.unshift(serverQueue.songs[0]);
+      }else{
+        serverQueue.songs.shift();
+      }
+      
       playSong(guild, serverQueue.songs[0]);
     })
     .on('disconnect', () => {
@@ -273,8 +308,8 @@ async function playSong(guild, song) {
       queue.delete(guild.id);
     });
 
-  dispatcher.setVolumeLogarithmic(serverQueue.volume / 10);
-  serverQueue.textChannel.send(`**Playing**🎶 \`${song.title}\` - Now`);
+  dispatcher.setVolumeLogarithmic(serverQueue.volume / 100);
+  if (!serverQueue.songs[0].looping) serverQueue.textChannel.send(`**Playing**🎶 \`${song.title}\` - Now`);
 }
 
 function formatSeconds(seconds) {
