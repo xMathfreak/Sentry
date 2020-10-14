@@ -139,8 +139,10 @@ module.exports = {
     if (!message.member.voice.channel) return message.channel.send("**❌ You need to be in a voice channel to use this command**");
     if (!serverQueue || !serverQueue.songs[0]) return message.channel.send("**❌ There is no song to skip**");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return message.channel.send("**❌ You need to be in the same voice channel as me**");
-
+    
+    serverQueue.songs[0].looping = false;
     serverQueue.connection.dispatcher.end();
+    
     message.channel.send("⏩ **Skipped**");
   },
 
