@@ -45,7 +45,7 @@ module.exports = {
       }
   
       const splitDefinition = splitMessage(definitionString, {
-        maxLength: 1000,
+        maxLength: 2040,
         char: "\n",
         prepend: "",
         append: ""
