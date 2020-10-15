@@ -292,12 +292,7 @@ async function playSong(guild, song) {
       type: 'opus'
     })
     .on('finish', () => {
-      if (serverQueue.looping){
-        serverQueue.songs.unshift(serverQueue.songs[0]);
-      }else{
-        serverQueue.songs.shift();
-      }
-      
+      if (!serverQueue.looping) serverQueue.songs.shift();   
       playSong(guild, serverQueue.songs[0]);
     })
     .on('disconnect', () => {
