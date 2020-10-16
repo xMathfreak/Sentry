@@ -1,4 +1,5 @@
 ﻿const { splitMessage, MessageEmbed } = require('discord.js');
+const { errorMessage } = require('../include/core.js');
 const request = require('request');
 
 module.exports = {
@@ -11,7 +12,8 @@ module.exports = {
   category: "search",
   aliases: ["wordsearch", "definition"],
   execute: async function (message, args) {
-    if (!args[0]) return message.channel.send("**❌ You need to specify a word to search for!**");
+    if (!args[0]) return errorMessage(message.channel, "You need to specify a word to search for");
+
 
     var options = {
       url: "https://api.dictionaryapi.dev/api/v2/entries/en/" + args,
@@ -27,7 +29,7 @@ module.exports = {
   
       var data = JSON.parse(responseBody);
   
-      if (!data || !data[0]) return message.channel.send("**❌ There was an error getting the definition**");
+      if (!data || !data[0]) return errorMessage(message.channel, "There was an error retrieving the definition");
       var definitionString = '';
   
       for (var definitions in data[0].meanings) {

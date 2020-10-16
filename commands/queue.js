@@ -9,7 +9,7 @@ module.exports = {
     usage: "`s!queue`"
   },
   category:"music",
-  execute: async function (message) {
-    queue(message);
+  execute: async function (message, args) {
+    queue(message, args);
   }
 }

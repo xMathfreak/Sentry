@@ -1,4 +1,5 @@
 const {MessageEmbed} = require('discord.js');
+const { errorMessage } = require('../include/core.js');
 const request = require('request');
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
   category: "search",
   aliases: ["urbandict", "urbandictionary", "udict", "udictionary", "urbansearch"],
   execute: async function (message, args) {
-    if (!args[0]) return message.channel.send("**❌ You need to specify a word to search for!**");
+    if (!args[0]) return errorMessage(message.channel, "You need to specify a word to search for");
 
     var options = {
       url: "http://api.urbandictionary.com/v0/define?term=" + args,
@@ -27,8 +28,8 @@ module.exports = {
   
       var data = JSON.parse(responseBody);
   
-      if (!data) return message.channel.send("**❌ There was an error getting the definition**");
-      if (!data.list[0]) return message.channel.send("**❌ The word couldnt be found**");
+      if (!data) return errorMessage(message.channel, "There was an error retrieving the definition");
+      if (!data.list[0]) return errorMessage(message.channel, "The word could not be found")
   
       const definitionEmbed = new MessageEmbed()
         .setTitle(`Word: ${data.list[0].word}`)
