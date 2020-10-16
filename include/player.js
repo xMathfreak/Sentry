@@ -1,8 +1,7 @@
 const { splitMessage, escapeMarkdown, MessageEmbed } = require('discord.js');
-const YoutubeAPI = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
+const usetube = require('usetube');
 const ytdlDiscord = require('ytdl-core-discord');
-const youtube = new YoutubeAPI(process.env.YOUTUBE_API_KEY);
 const { errorMessage } = require('../include/core.js');
 const queue = new Map();
 
@@ -15,7 +14,7 @@ module.exports = {
     const permission = vc.channel.permissionsFor(message.guild.me);
 
     const search = args.join(' ');
-    const url = args[0];
+    const url = args[0].replace(/\<|\>/g, "");
     const urlValid = ytRegex.test(url);
 
     if (!vc.channel) return errorMessage(message.channel, "You need to be in a voice channel to use this");
@@ -36,9 +35,10 @@ module.exports = {
       }
     } else {
       try {
-        const results = await youtube.searchVideos(search, 1);
-        if (!results[0]) return errorMessage(message.channel, "Song not found");
-        songInfo = await ytdl.getInfo(results[0].url);
+        //const results = await youtube.searchVideos(search, 1);
+        const results = await usetube.searchVideo(search);
+        if (!results.tracks[0]) return errorMessage(message.channel, "Song not found");
+        songInfo = await ytdl.getInfo(`https://www.youtube.com/watch?v=${results.tracks[0].id}`);
       } catch (error) {
         console.log(error);
         return errorMessage(message.channel, "There was an error playing the song");
@@ -152,7 +152,7 @@ module.exports = {
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
 
     nowPlayingEmbed = new MessageEmbed()
-      .setTitle(serverQueue.songs[0].title)
+      .setTitle(escapeMarkdown(serverQueue.songs[0].title))
       .setURL(serverQueue.songs[0].url)
       .setThumbnail(serverQueue.songs[0].thumbnail)
       .setAuthor("Now Playing ♫")
@@ -173,19 +173,19 @@ module.exports = {
   queue: async function (message, args) {
     const serverQueue = queue.get(message.guild.id);
     let page = ~~Math.abs(args[0]) || 1;
-    let pageNum = Math.ceil((serverQueue.songs.length-1)/5);
+    let pageNum = Math.ceil((serverQueue.songs.length - 1) / 5);
 
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
     if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (page == 0) return errorMessage(message.channel, "There are no songs on page 0");
     if (page >= Math.ceil(serverQueue.songs.length / 5) + 1) return errorMessage(message.channel, `Queue ends at ${Math.ceil(serverQueue.songs.length/5)}`);
-    if (pageNum==0) pageNum=1;
+    if (pageNum == 0) pageNum = 1;
 
     const currentSong = serverQueue.songs[0];
     const desc = serverQueue.songs.slice(1)
       .slice((page * 5) - 5, (page * 5))
-      .map((song, index) => `\`${1+index+((page-1)*5)}.\` ${song.title} | \`${formatSeconds(song.duration)} Requested by: ${song.requester.tag}\``);
+      .map((song, index) => `\`${1+index+((page-1)*5)}.\` [${escapeMarkdown(song.title)}](${song.url}) | \`${formatSeconds(song.duration)} Requested by: ${song.requester.tag}\``);
 
     const splitDesc = splitMessage(desc, {
       maxLength: 1024,
@@ -196,7 +196,7 @@ module.exports = {
 
     const queueEmbed = new MessageEmbed()
       .setTitle(`Queue for ${message.guild.name}`)
-      .addField("Now playing", `${currentSong.title} | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requester.tag}\``)
+      .addField("Now playing", `[${escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requester.tag}\``)
       .addField("Up Next", splitDesc[0] || "Nothing")
       .setFooter(`Page ${page}/${pageNum}`, message.author.avatarURL());
     message.channel.send(queueEmbed);
@@ -240,7 +240,7 @@ module.exports = {
     if (message.author != serverQueue.songs[args[0]].requester || !message.member.hasPermission(['MOVE_MEMBERS'])) return errorMessage(message.channel, "You cannot remove a song you did not add");
 
     const song = serverQueue.songs.splice(args[0], 1);
-    message.channel.send(`❎ ${song[0].title} was removed from the queue`);
+    message.channel.send(`❎ ${escapeMarkdown(song[0].title)} was removed from the queue`);
   },
 
   volume: async function (message, args) {
