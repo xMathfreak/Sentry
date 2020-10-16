@@ -41,7 +41,7 @@ module.exports = {
         songInfo = await ytdl.getInfo(results[0].url);
       } catch (error) {
         console.log(error);
-        return errorMessage(message.channel, "There was an error song");
+        return errorMessage(message.channel, "There was an error playing the song");
       }
     }
 
