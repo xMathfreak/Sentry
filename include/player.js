@@ -126,7 +126,8 @@ module.exports = {
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
     if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs playing");
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice chat as me");
-
+    
+    serverQueue.looping = false;
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
 
@@ -139,7 +140,7 @@ module.exports = {
     if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs to skip")
     if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You need to be in the same voice channel as me");
 
-    serverQueue.songs[0].looping = false;
+    serverQueue.looping = false;
     serverQueue.connection.dispatcher.end();
 
     message.channel.send("⏩ **Skipped**");
