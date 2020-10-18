@@ -1,6 +1,6 @@
 {
     "name": "sentrybot",
-    "version": "1.0.1",
+    "version": "0.9.3",
     "description": "still indev",
     "main": "bot.js",
     "author": "Mathfreak",
@@ -12,11 +12,11 @@
         "jshint": "^2.9.5",
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
-        "usetube": "^1.1.2",
+        "simpleyt": "^1.0.6",
         "ytdl-core": "^3.3.0",
         "ytdl-core-discord": "^1.2.3"
     },
-    "engines":{
+    "engines": {
         "node": "12.13.x"
     }
 }

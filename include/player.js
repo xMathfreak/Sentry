@@ -1,6 +1,6 @@
 const { splitMessage, escapeMarkdown, MessageEmbed } = require('discord.js');
+const simpleYT = require('simpleyt');
 const ytdl = require('ytdl-core');
-const usetube = require('usetube');
 const ytdlDiscord = require('ytdl-core-discord');
 const { errorMessage } = require('../include/core.js');
 const queue = new Map();
@@ -18,7 +18,7 @@ module.exports = {
     const urlValid = ytRegex.test(url);
 
     if (!vc.channel) return errorMessage(message.channel, "You need to be in a voice channel to use this");
-    if (serverQueue && vc.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You need to be in the same voice channel as me");
+    if (serverQueue && vc.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You need to be in the same voice channel as me");
     if (!permission.has('CONNECT')) return errorMessage(message.channel, "I do not have permissions to join your voice channel");
     if (!permission.has('SPEAK')) return errorMessage(message.channel, "I do not have permissions to join your voice channel");
     if (!url) return errorMessage(message.channel, "I do not have permissions to join your voice channel");
@@ -35,10 +35,9 @@ module.exports = {
       }
     } else {
       try {
-        //const results = await youtube.searchVideos(search, 1);
-        const results = await usetube.searchVideo(search);
-        if (!results.tracks[0]) return errorMessage(message.channel, "Song not found");
-        songInfo = await ytdl.getInfo(`https://www.youtube.com/watch?v=${results.tracks[0].id}`);
+        const results = await simpleYT(search, { filter: 'video'});
+        if (!results[0]) return errorMessage(message.channel, "Song not found");
+        songInfo = await ytdl.getInfo(results[0].uri);
       } catch (error) {
         console.log(error);
         return errorMessage(message.channel, "There was an error playing the song");
@@ -85,7 +84,7 @@ module.exports = {
             inline: true
           }, {
             name: "Song Duration",
-            value: formatSeconds(queueConstruct.songs[0].duration),
+            value: new Date(queueConstruct.songs[0].duration * 1000).toISOString().substr(11, 8),
             inline: true
           });
 
@@ -95,7 +94,7 @@ module.exports = {
       } catch (error) {
         console.log(error);
         queue.delete(message.guild.id);
-        serverQueue.voiceChannel.leave();
+        message.guild.me.voice.channel.leave();
 
         return errorMessage(message.channel, "There was an error playing the song");
       }
@@ -113,7 +112,7 @@ module.exports = {
           inline: true
         }, {
           name: "Song Duration",
-          value: formatSeconds(song.duration),
+          value: new Date(song.duration * 1000).toISOString().substr(11, 8),
           inline: true
         });
 
@@ -124,10 +123,9 @@ module.exports = {
   stop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs playing");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice chat as me");
-    
-    serverQueue.looping = false;
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs playing");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice chat as me");
+
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
 
@@ -137,10 +135,10 @@ module.exports = {
   skip: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs to skip")
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You need to be in the same voice channel as me");
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs to skip")
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You need to be in the same voice channel as me");
 
-    serverQueue.looping = false;
+    serverQueue.songs[0].looping = false;
     serverQueue.connection.dispatcher.end();
 
     message.channel.send("⏩ **Skipped**");
@@ -149,8 +147,11 @@ module.exports = {
   nowPlaying: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me");
+
+    const seek = (serverQueue.connection.dispatcher.streamTime - serverQueue.connection.dispatcher.pausedTime) / 1000;
+    const timeLeft = serverQueue.songs[0].duration - seek;
 
     nowPlayingEmbed = new MessageEmbed()
       .setTitle(escapeMarkdown(serverQueue.songs[0].title))
@@ -158,15 +159,7 @@ module.exports = {
       .setThumbnail(serverQueue.songs[0].thumbnail)
       .setAuthor("Now Playing ♫")
       .setFooter(`Requested by: ${serverQueue.songs[0].requester.tag}`)
-      .addFields({
-        name: "Channel",
-        value: serverQueue.songs[0].author,
-        inline: true
-      }, {
-        name: "Song Duration",
-        value: formatSeconds(serverQueue.songs[0].duration),
-        inline: true
-      });
+      .addField(progressBar(seek, serverQueue.songs[0].duration, 30), `\`${new Date(seek * 1000).toISOString().substr(11, 8)} / ${new Date(serverQueue.songs[0].duration * 1000).toISOString().substr(11, 8)}\``);
 
     return message.channel.send(nowPlayingEmbed);
   },
@@ -177,8 +170,8 @@ module.exports = {
     let pageNum = Math.ceil((serverQueue.songs.length - 1) / 5);
 
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (page == 0) return errorMessage(message.channel, "There are no songs on page 0");
     if (page >= Math.ceil(serverQueue.songs.length / 5) + 1) return errorMessage(message.channel, `Queue ends at ${Math.ceil(serverQueue.songs.length/5)}`);
     if (pageNum == 0) pageNum = 1;
@@ -186,7 +179,7 @@ module.exports = {
     const currentSong = serverQueue.songs[0];
     const desc = serverQueue.songs.slice(1)
       .slice((page * 5) - 5, (page * 5))
-      .map((song, index) => `\`${1+index+((page-1)*5)}.\` [${escapeMarkdown(song.title)}](${song.url}) | \`${formatSeconds(song.duration)} Requested by: ${song.requester.tag}\``);
+      .map((song, index) => `\`${1+index+((page-1)*5)}.\` [${escapeMarkdown(song.title)}](${song.url}) | \`${new Date(song.duration * 1000).toISOString().substr(11, 8)} Requested by: ${song.requester.tag}\``);
 
     const splitDesc = splitMessage(desc, {
       maxLength: 1024,
@@ -197,7 +190,7 @@ module.exports = {
 
     const queueEmbed = new MessageEmbed()
       .setTitle(`Queue for ${message.guild.name}`)
-      .addField("Now playing", `[${escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${formatSeconds(currentSong.duration)} Requested by: ${currentSong.requester.tag}\``)
+      .addField("Now playing", `[${escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${new Date(currentSong.duration * 1000).toISOString().substr(11, 8)} Requested by: ${currentSong.requester.tag}\``)
       .addField("Up Next", splitDesc[0] || "Nothing")
       .setFooter(`Page ${page}/${pageNum}`, message.author.avatarURL());
     message.channel.send(queueEmbed);
@@ -206,8 +199,8 @@ module.exports = {
   pause: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (serverQueue.playing) {
       serverQueue.playing = false;
       serverQueue.connection.dispatcher.pause(true);
@@ -218,8 +211,8 @@ module.exports = {
   resume: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (!serverQueue.playing) {
       serverQueue.playing = true;
       serverQueue.connection.dispatcher.resume();
@@ -232,8 +225,8 @@ module.exports = {
   remove: async function (message, args) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (!args.length) return errorMessage(message.channel, "You need to insert a position in the queue");
     if (isNaN(args[0])) return errorMessage(message.channel, "You need to specify a number");
 
@@ -247,8 +240,8 @@ module.exports = {
   volume: async function (message, args) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me");
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me");
     if (isNaN(args[0]) || !args[0]) return errorMessage(message.channel, "Please input a number");
     if (args[0] <= 0 || args[0] > 100) return errorMessage(message.channel, "Please input a number greater than 0 and less than 100");
 
@@ -261,8 +254,8 @@ module.exports = {
   loop: async function (message) {
     const serverQueue = queue.get(message.guild.id);
     if (!message.member.voice.channel) return errorMessage(message.channel, "You have to be in a voice chat to use this command");
-    if (!serverQueue || !serverQueue.songs[0]) return errorMessage(message.channel, "There are no songs in the queue");
-    if (serverQueue && message.member.voice.channel != serverQueue.voiceChannel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
+    if (!serverQueue || serverQueue.connection.dispatcher==null) return errorMessage(message.channel, "There are no songs in the queue");
+    if (serverQueue && message.member.voice.channel != message.guild.me.voice.channel) return errorMessage(message.channel, "You have to be in the same voice channel as me")
     if (serverQueue.looping) {
       serverQueue.looping = false;
       message.channel.send(`**🔂 Disabled!**`);
@@ -277,10 +270,12 @@ async function playSong(guild, song) {
   let serverQueue = queue.get(guild.id);
 
   if (!song) {
-    serverQueue.voiceChannel.leave();
+    guild.me.voice.channel.leave();
     queue.delete(guild.id);
     return;
   }
+
+  if (!guild.me.voice.channel) return queue.delete(guild.id);
 
   const dispatcher = serverQueue.connection.play(await ytdlDiscord(song.url, {
       quality: 'highestaudio',
@@ -288,6 +283,9 @@ async function playSong(guild, song) {
       filter: "audioonly"
     }), {
       type: 'opus'
+    }, {
+      highWaterMark: 1,
+      bitrate: 192000
     })
     .on('finish', () => {
       if (!serverQueue.looping) serverQueue.songs.shift();
@@ -298,7 +296,7 @@ async function playSong(guild, song) {
     })
     .on('error', error => {
       console.error(error);
-      serverQueue.voiceChannel.leave();
+      guild.me.voice.channel.leave();
       errorMessage(serverQueue.textChannel, "There was an error while playing the song");
       queue.delete(guild.id);
     });
@@ -307,8 +305,14 @@ async function playSong(guild, song) {
   if (!serverQueue.looping) serverQueue.textChannel.send(`**Playing**🎶 \`${song.title}\` - Now`);
 }
 
-function formatSeconds(seconds) {
-  var date = new Date(1970, 0, 1);
-  date.setSeconds(seconds);
-  return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+function progressBar(value, maxValue, size){
+  const percentage = value / maxValue;
+  const progress = Math.round(size * percentage);
+  const emptyProgress = size - progress;
+  
+  const progressText = '▇'.repeat(progress);
+  const emptyProgressText = '▬'.repeat(emptyProgress);
+  
+  const bar = `\`\`[${progressText}${emptyProgressText}]\`\``
+  return bar;
 }
