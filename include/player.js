@@ -310,9 +310,9 @@ function progressBar(value, maxValue, size){
   const progress = Math.round(size * percentage);
   const emptyProgress = size - progress;
   
-  const progressText = '▇'.repeat(progress);
+  const progressText = '█'.repeat(progress);
   const emptyProgressText = '▬'.repeat(emptyProgress);
   
-  const bar = `\`\`[${progressText}${emptyProgressText}]\`\``
+  const bar = `\`\`⟦${progressText}${emptyProgressText}⟧\`\``
   return bar;
 }
