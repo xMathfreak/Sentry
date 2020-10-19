@@ -99,6 +99,7 @@ module.exports = {
         return errorMessage(message.channel, "There was an error playing the song");
       }
     } else {
+      serverQueue.voiceChannel = message.guild.me.voice.channel;
       serverQueue.songs.push(song);
 
       const playEmbed = new MessageEmbed()
@@ -268,7 +269,8 @@ module.exports = {
 
 async function playSong(guild, song) {
   let serverQueue = queue.get(guild.id);
-
+  serverQueue.voiceChannel = message.guild.me.voice.channel;
+  
   if (!song) {
     guild.me.voice.channel.leave();
     queue.delete(guild.id);
