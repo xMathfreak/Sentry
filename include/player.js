@@ -269,7 +269,7 @@ module.exports = {
 
 async function playSong(guild, song) {
   let serverQueue = queue.get(guild.id);
-  serverQueue.voiceChannel = message.guild.me.voice.channel;
+  serverQueue.voiceChannel = guild.me.voice.channel;
   
   if (!song) {
     guild.me.voice.channel.leave();
