@@ -7,6 +7,7 @@ const queue = new Map();
 
 module.exports = {
   play: async function (message, args) {
+    console.log(queue);
     const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
 
     let serverQueue = queue.get(message.guild.id);
