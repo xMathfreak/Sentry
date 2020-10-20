@@ -13,7 +13,7 @@
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
         "simpleyt": "^1.0.6",
-        "ytdl-core": "^3.3.0",
+        "ytdl-core": "^3.4.1",
         "ytdl-core-discord": "^1.2.3"
     },
     "engines": {
