@@ -35,13 +35,16 @@ module.exports = {
     }else{
       try{
         results = await simpleYT(search, { filter: 'video' });
-        if (!results[0]) return errorMessage(message.channel, "Song not found");
+        if (!results[0] || typeof results[0].uri === undefined) return errorMessage(message.channel, "Song not found");
         songInfo = await ytdl.getInfo(results[0].uri);
       }catch(e) {
         console.log(e);
         return errorMessage(message.channel, "There was an error while finding the song");
       }
     }
+
+    if (songInfo==null) return errorMessage(message.channel, "There was an error finding the song");
+    console.log(songInfo.videoDetails.url)
 
     song = {
       title: songInfo.videoDetails.title,
@@ -52,8 +55,7 @@ module.exports = {
       requester: message.author
     };
 	
-	if (songInfo==null) return errorMessage(message.channel, "There was an error finding the song");
-    if (song.duration >= 10830) return errorMessage(message.channel, "Cannot play a song longer than 3 hours");
+  if (song.duration >= 10830) return errorMessage(message.channel, "Cannot play a song longer than 3 hours");
 
     if (!serverQueue) {
       let queueConstruct = {
