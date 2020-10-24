@@ -30,7 +30,7 @@ module.exports = {
         songInfo = await ytdl.getInfo(url);
       }catch(e) {
         console.log(e);
-        errorMessage(message.channel, "There was an error while finding the song");
+        return errorMessage(message.channel, "There was an error while finding the song");
       }
     }else{
       try{
@@ -39,7 +39,7 @@ module.exports = {
         songInfo = await ytdl.getInfo(results[0].uri);
       }catch(e) {
         console.log(e);
-        errorMessage(message.channel, "There was an error while finding the song");
+        return errorMessage(message.channel, "There was an error while finding the song");
       }
     }
 
@@ -51,7 +51,8 @@ module.exports = {
       author: songInfo.videoDetails.author.name,
       requester: message.author
     };
-
+	
+	if (songInfo==null) return errorMessage(message.channel, "There was an error finding the song");
     if (song.duration >= 10830) return errorMessage(message.channel, "Cannot play a song longer than 3 hours");
 
     if (!serverQueue) {
