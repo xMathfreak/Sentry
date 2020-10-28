@@ -13,7 +13,7 @@ module.exports = {
     }else if (args[0] && !args[1]){
       message.channel.send(`🎲 **${getRandomInt(0, args[0])}**`);
     }else if (!args[0] && !args[1]){
-      message.channel.send(`🎲 **${Math.random()}**`);
+      message.channel.send(`🎲 **${Math.floor(Math.random()*100)}**`);
     }
   }
 }

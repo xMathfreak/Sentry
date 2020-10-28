@@ -15,10 +15,11 @@ module.exports = {
       message.channel.send({
         embed: {
           title: "All Commands",
+          description: "Use `s!help [command]` for get information about a specific command",
           fields: [{
-            name: "🎶 Music",
-            value: `${getCategory("music")}`,
-            inline: false
+            name: "🛠️ Utility",
+            value: `${getCategory("utility")}`,
+            inline: true
           },
           {
             name: "🔍 Search",
@@ -26,14 +27,14 @@ module.exports = {
             inline: true
           },
           {
-            name: "🛠️ Utility",
-            value: `${getCategory("utility")}`,
-            inline: true
+            name: "🎶 Music",
+            value: `${getCategory("music")}`,
+            inline: false
           },
           {
             name:"👮 Moderation",
             value: `${getCategory("moderation")}`,
-            inline: false
+            inline: true
           }
         ]
         }
@@ -59,5 +60,6 @@ function getCategory(category){
       array.push(`\`${value.name}\``);
     }
   });
-  return array;
+
+  return array.toString().replace(/((?:[^\,]*\,){4}[^\,]*)\,/gm, '$1\n');
 }
