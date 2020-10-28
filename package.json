@@ -12,9 +12,9 @@
         "jshint": "^2.9.5",
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
-        "simpleyt": "^1.0.6",
-        "ytdl-core": "^3.4.1",
-        "ytdl-core-discord": "^1.2.3"
+        "scrape-youtube": "^0.2.6",
+        "ytdl-core": "^4.0.0",
+        "ytdl-core-discord": "^1.2.4"
     },
     "engines": {
         "node": "12.13.x"
