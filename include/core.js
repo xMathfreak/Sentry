@@ -11,9 +11,6 @@ fs.readdir('./commands', (err, files) => {
 
 module.exports = {
   commands: commands,
-  errorMessage: async function (channel, content){
-    return channel.send(`**❌ ${content}**`);
-  },
   executeCommand: async function (message, prefix) {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
@@ -24,9 +21,7 @@ module.exports = {
 
     commands.forEach(async function (value, key) {
       if (key == command || (value && value.aliases && value.aliases.includes(command))) {
-        value.execute(message, args).catch(error => {
-          console.log(error)
-        });
+        value.execute(message, args).catch(e => console.log(e));
       }
     });
   }

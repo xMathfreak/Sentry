@@ -1,6 +1,6 @@
 module.exports = {
   name: "random",
-  aliases: ["rnd"],
+  aliases: ["rnd", "rand"],
   help: {
     name: "Random",
     description: "Returns a random number between a range or from 0 to a number",
