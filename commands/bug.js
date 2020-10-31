@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   name: "bug",
+  aliases: ["reportbug", "bugreport"]
   help: {
     name: "Bug",
     description: "Reports a bug",
@@ -17,5 +18,6 @@ module.exports = {
       .setColor(13369395)
       .setTimestamp();
     message.guild.me.client.channels.cache.get('771832965683478528').send(bugEmbed);
+    message.channel.send("🦟 **Bug report sent**");
   }
 }
