@@ -15,7 +15,7 @@ module.exports = {
     if (!args[0]) return errorMessage(message, "You need to specify a word to search for");
 
     var options = {
-      url: "http://api.urbandictionary.com/v0/define?term=" + args,
+      url: "http://api.urbandictionary.com/v0/define?term=" + args.join(' '),
       method: "GET",
       headers: {
         "Accept": "text/html",
@@ -29,7 +29,7 @@ module.exports = {
       var data = JSON.parse(responseBody);
   
       if (!data) return errorMessage(message, "There was an error retrieving the definition");
-      if (!data.list[0]) return errorMessage(message, "The word could not be found")
+      if (!data.list || !data.list[0]) return errorMessage(message, "The word could not be found");
   
       const definitionEmbed = new MessageEmbed()
         .setTitle(`Word: ${data.list[0].word}`)
