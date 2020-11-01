@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   name: "bug",
-  aliases: ["reportbug", "bugreport"]
+  aliases: ["reportbug", "bugreport"],
   help: {
     name: "Bug",
     description: "Reports a bug",
