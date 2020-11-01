@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const cheerio = require('cheerio');
 const request = require('request');
-const { errorMessage } = require('../include/core');
+const { errorMessage } = require('../utils/errors.js');
 
 module.exports = {
   name: "image",
@@ -30,7 +30,7 @@ module.exports = {
       var links = $(".image a.link");
       var urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
 
-      if (!urls.length) return errorMessage(message.channel, "Couldn't find any images based on your search");
+      if (!urls.length) return errorMessage(message, "Couldn't find any images based on your search");
 
       imageURL = urls[~~(Math.random() * urls.length)];
       const imageEmbed = new MessageEmbed()
