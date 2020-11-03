@@ -12,7 +12,7 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-  core.executeCommand(message, prefix);
+  executeCommand(message, prefix);
 });
 
 client.login(process.env.BOT_TOKEN);
