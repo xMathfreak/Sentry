@@ -17,7 +17,7 @@ module.exports = {
       .setDescription(args.join(' '))
       .setColor(13369395)
       .setTimestamp();
-    message.guild.me.client.channels.cache.get('771832965683478528').send(bugEmbed);
+    message.guild.me.client.channels.cache.get(process.env.BUG_LOG_CHANNEL_ID).send(bugEmbed);
     message.channel.send("🦟 **Bug report sent**");
   }
 }
