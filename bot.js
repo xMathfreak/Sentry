@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const core = require('./include/core.js');
+const { executeCommand } = require('./utils/handler.js');
 
 const client = new Discord.Client();
 const prefix = 's!';
