@@ -13,7 +13,7 @@
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
         "scrape-youtube": "^0.2.6",
-        "ytdl-core": "^4.0.0",
+        "ytdl-core": "latest",
         "ytdl-core-discord": "^1.2.4"
     },
     "engines": {
