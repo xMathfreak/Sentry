@@ -11,11 +11,18 @@ module.exports = {
   },
   category: "utility",
   execute: async function (message, args) {
+    const avatar = message.guild.me.user.avatarURL();
     if (!args[0]) {
       message.channel.send({
         embed: {
-          title: "All Commands",
+          author: {
+            name: "All Commands",
+            icon_url: avatar
+          },
           description: "Use `s!help [command]` for get information about a specific command",
+          thumbnail: {
+            url: avatar
+          },
           fields: [{
             name: "🛠️ Utility",
             value: `${getCategory("utility")}`,
