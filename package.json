@@ -12,7 +12,7 @@
         "jshint": "^2.9.5",
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
-        "scrape-youtube": "^0.2.6",
+        "scrape-youtube": "^1.1.0",
         "ytdl-core": "latest",
         "ytdl-core-discord": "^1.2.4"
     },
