@@ -275,9 +275,8 @@ async function playSong(guild, song) {
 
 	const dispatcher = serverQueue.connection.play(
 		ytdl(song.url, {
-			quality: 'highestaudio',
-			filter: 'audioonly',
 			opusEncoded: true,
+			filter: 'audioonly',
 			highWaterMark: 1 << 25
 		}),
 		{
