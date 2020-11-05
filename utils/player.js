@@ -273,7 +273,7 @@ async function playSong(guild, song) {
 
   if (!guild.me.voice.channel) return queue.delete(guild.id);
 
-  const dispatcher = serverQueue.connection.play(await ytdlDiscord(song.url, { quality: 'highestaudio', highWaterMark: 1 << 25, filter: 'audioonly'}), {type: 'opus', highWaterMark: 1, bitrate: 192000})
+  const dispatcher = serverQueue.connection.play(await ytdl(song.url, { quality: 'highestaudio', highWaterMark: 1 << 25, filter: 'audioonly'}))
     .on('finish', () => {
       if (!serverQueue.looping) serverQueue.songs.shift();
       playSong(guild, serverQueue.songs[0]);
