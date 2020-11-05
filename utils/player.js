@@ -285,7 +285,7 @@ async function playSong(guild, song) {
         bitrate: 'auto'
       }
     )
-    .on('disconnect', () => queue.delete(guild.id))
+    .on('disconnect', () => return queue.delete(guild.id))
     .on('error', e => {
       console.log(e);
       guild.me.voice.channel.leave();
