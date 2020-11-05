@@ -2,7 +2,7 @@ const { splitMessage, escapeMarkdown, MessageEmbed } = require('discord.js');
 const { errorMessage } = require('../utils/errors.js');
 const scrapeYT = require('scrape-youtube').default;
 const ytdl = require('ytdl-core');
-const ytdlDiscord = require('ytdl-core-discord');
+const ytdlDiscord = require('discord-ytdl-core');
 
 const queue = new Map();
 const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
@@ -273,25 +273,34 @@ async function playSong(guild, song) {
 
   if (!guild.me.voice.channel) return queue.delete(guild.id);
 
-  const dispatcher = serverQueue.connection.play(await ytdl(song.url, { quality: 'highestaudio', highWaterMark: 1 << 25, filter: 'audioonly'}))
-    .on('finish', () => {
-      if (!serverQueue.looping) serverQueue.songs.shift();
-      playSong(guild, serverQueue.songs[0]);
-    })
-    .on('disconnect', () => queue.delete(guild.id))
-    .on('error', e => {
-      guild.me.voice.channel.leave();
-      console.log(e);
-      errorMessage(serverQueue.textChannel, "An error occured while playing the song");
-      return queue.delete(guild.id);
-    });
+	const dispatcher = serverQueue.connection.play(
+		ytdl(song.url, {
+			quality: 'highestaudio',
+			filter: 'audioonly',
+			opusEncoded: true,
+			highWaterMark: 1 << 25
+		}),
+		{
+			type: 'opus',
+			bitrate: 'auto'
+		}
+	)
+	.on('disconnect', () => {
+		guild.me.voice.channel.leave();
+		dispatcher.destroy();
+	})
+	.on('error', e => {
+		console.log(e);
+		guild.me.voice.channel.leave();
+		dispatcher.destroy();
+		errorMessage(serverQueue.textChannel, "An error occured while playing the song");
+		return queue.delete(guild.id);
+	})
+	.on('finish', () => {
+		if (!serverQueue.looping) serverQueue.songs.shift();
+		playSong(guild, serverQueue.songs[0]);
+	});
 
-  dispatcher.on('error', e => {
-    guild.me.voice.channel.leave();
-    console.log(e);
-    errorMessage(serverQueue.textChannel, "An error occured while playing the song");
-    return queue.delete(guild.id);
-  });
 
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 100);
   if (!serverQueue.looping) serverQueue.textChannel.send(`🎶 **Playing** \`${song.title}\` - Now`);
