@@ -274,7 +274,7 @@ async function playSong(guild, song) {
   if (!guild.me.voice.channel) return queue.delete(guild.id);
 
 	const dispatcher = serverQueue.connection.play(
-		ytdl(song.url, {
+		ytdlDiscord(song.url, {
 			opusEncoded: true,
 			filter: 'audioonly',
 			highWaterMark: 1 << 25
