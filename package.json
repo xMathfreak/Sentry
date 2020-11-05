@@ -7,14 +7,14 @@
     "dependencies": {
         "cheerio": "^1.0.0-rc.3",
         "discord.js": "^12.3.1",
+        "discord-ytdl-core": "^4.1.4",
         "eslint": "^4.19.1",
         "ffmpeg-static": "^4.2.7",
         "jshint": "^2.9.5",
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
         "scrape-youtube": "^1.1.0",
-        "ytdl-core": "latest",
-        "ytdl-core-discord": "^1.2.4"
+        "ytdl-core": "latest"
     },
     "engines": {
         "node": "12.13.x"
