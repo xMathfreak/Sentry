@@ -35,7 +35,7 @@ module.exports = {
     }else{
       try{
         result = await scrapeYT.search(search, { type: 'video'} );
-        if (!result.videos[0] || typeof result.videos[0].link === undefined) return errorMessage(message, "Song not found");
+        if (!result.videos[0] || !ytdl.validateURL(result.videos[0].link)) return errorMessage(message, "Song not found");
         songInfo = await ytdl.getInfo(result.videos[0].link);
       }catch(e) {
         console.log(e);
