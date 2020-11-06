@@ -266,12 +266,11 @@ async function playSong(guild, song) {
   let serverQueue = queue.get(guild.id);
   serverQueue.voiceChannel = guild.me.voice.channel;
 
-  if (!song) {
+  if (!song || !serverQueue.songs.length) {
     await guild.me.voice.channel.leave();
     queue.delete(guild.id);
     return;
   }
-
   if (!guild.me.voice.channel) return queue.delete(guild.id);
 
   const dispatcher = serverQueue.connection.play(
@@ -285,7 +284,9 @@ async function playSong(guild, song) {
         bitrate: 'auto'
       }
     )
-    .on('disconnect', () => { return queue.delete(guild.id) })
+    .on('disconnect', () => {
+      return queue.delete(guild.id);
+    })
     .on('error', e => {
       console.log(e);
       guild.me.voice.channel.leave();
@@ -298,6 +299,7 @@ async function playSong(guild, song) {
       playSong(guild, serverQueue.songs[0]);
     });
 
+  serverQueue.connection.on('disconnect', () => { return queue.delete(guild.id) });
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 100);
   if (!serverQueue.looping) serverQueue.textChannel.send(`🎶 **Playing** \`${song.title}\` - Now`);
 }
