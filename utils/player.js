@@ -33,16 +33,8 @@ module.exports = {
         return errorMessage(message, "There was an error while finding the song");
       }
     } else {
-      try {
-        result = await scrapeYT.search(search, {
-          type: 'video'
-        });
-        if (!result.videos[0] || !ytdl.validateURL(result.videos[0].link)) return errorMessage(message, "Song not found");
-        songInfo = await ytdl.getInfo(result.videos[0].link);
-      } catch (e) {
-        console.log(e);
-        return errorMessage(message, "There was an error while finding the song");
-      }
+      songInfo = await handleVideoFromSearch(message, search, 0);
+      if (!songInfo) return;
     }
 
     if (songInfo == null) return errorMessage(message, "There was an error finding the song");
@@ -299,7 +291,9 @@ async function playSong(guild, song) {
       playSong(guild, serverQueue.songs[0]);
     });
 
-  serverQueue.connection.on('disconnect', () => { return queue.delete(guild.id) });
+  serverQueue.connection.on('disconnect', () => {
+    return queue.delete(guild.id)
+  });
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 100);
   if (!serverQueue.looping) serverQueue.textChannel.send(`🎶 **Playing** \`${song.title}\` - Now`);
 }
@@ -314,4 +308,25 @@ function progressBar(value, maxValue, size) {
 
   const bar = `\`\`${progressText}${emptyProgressText}\`\``
   return bar;
+}
+
+async function handleVideoFromSearch (message, search, tries) {
+  let result = null;
+  try{
+    message.channel.send(`🔎 **Searching for:** ${search}`);
+    const scrapeResult = await scrapeYT.search(search);
+    if (!scrapeResult.videos[0]) return errorMessage(message, "Song not found");
+    result = await ytdl.getInfo(scrapeResult.videos[0].link);
+  }catch(err){
+    if (err.message == 'Could not find player config' || err.message == 'Unable to retrieve video metadata'){
+      if (tries < 3){
+        return handleVideo(search, tries+1);
+      }
+    }else{
+      console.log(err);
+      errorMessage(message, "An error occurred while finding the song");
+    }
+  }
+
+  return result;
 }
