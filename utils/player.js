@@ -70,7 +70,6 @@ module.exports = {
         const connection = await voiceChannel.join();
         queueConstruct.connection = connection;
         queueConstruct.connection.voice.setSelfDeaf(true);
-        playSong(message.guild, queueConstruct.songs[0]);
 
         const playEmbed = new MessageEmbed()
           .setTitle(escapeMarkdown(queueConstruct.songs[0].title))
@@ -87,6 +86,8 @@ module.exports = {
             inline: true,
           });
         message.channel.send(playEmbed);
+
+        playSong(message.guild, queueConstruct.songs[0]);
       }
       catch (e) {
         queue.delete(message.guild.id);
@@ -275,7 +276,10 @@ async function playSong(guild, song) {
       quality: 'highestaudio',
       opusEncoded: true,
       filter: 'audioonly',
-      highWaterMark: 1 << 25,
+      highWaterMark: 1 << 20,
+      range: {
+        start: '0',
+      },
     }), {
       type: 'opus',
       bitrate: 'auto',
@@ -326,7 +330,7 @@ async function handleVideoFromSearch(message, search, tries) {
   catch(err) {
     if (err.message == 'Could not find player config' || err.message == 'Unable to retrieve video metadata') {
       if (tries < 3) {
-        return handleVideoFromSearch(search, tries + 1);
+        return setTimeout(() => handleVideoFromSearch(search, tries + 1), 1000);
       }
     }
     else{
