@@ -1,72 +1,59 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
 const { commands } = require('../../utils/handler.js');
 
 module.exports = {
-  name: "help",
-  aliases: ["?"],
+  name: 'help',
+  aliases: ['?'],
   help: {
-    name: "Help",
-    description: "Displays all available commands or Displays information about a specified command",
-    usage: "`s!help` or `s!help [command]`"
+    name: 'Help',
+    description: 'Displays all available commands or Displays information about a specified command',
+    usage: '`s!help` or `s!help [command]`',
   },
-  category: "utility",
-  execute: async function (message, args) {
-    const avatar = message.guild.me.user.avatarURL();
+  category: 'utility',
+  execute: async function(message, args) {
     if (!args[0]) {
-      message.channel.send({
-        embed: {
-          author: {
-            name: "All Commands",
-            icon_url: avatar
-          },
-          description: "Use `s!help [command]` for get information about a specific command",
-          thumbnail: {
-            url: avatar
-          },
-          fields: [{
-            name: "🛠️ Utility",
-            value: `${getCategory("utility")}`,
-            inline: true
-          },
-          {
-            name: "🔍 Search",
-            value: `${getCategory("search")}`,
-            inline: true
-          },
-          {
-            name: "🎶 Music",
-            value: `${getCategory("music")}`,
-            inline: false
-          },
-          {
-            name:"👮 Moderation",
-            value: `${getCategory("moderation")}`,
-            inline: true
-          }
-        ]
-        }
-      });
-    } else {
-      commands.forEach(async (value, key)=>{
-        if (key==args[0] || (value && value.aliases && value.aliases.includes(args[0]))){
-          const commandHelpEmbed = new MessageEmbed()
-            .addField("Command Name", value.help.name)
-            .addField("Description", value.help.description)
-            .addField("Usage", value.help.usage);
-          message.channel.send(commandHelpEmbed)
-        }
-      });
+      const categoriesEmbed = new MessageEmbed()
+        .setTitle('Sentry Command Categories')
+        .setDescription('Use `s!help [category]` to view commands under a category!')
+        .addField('🛠️ Utility', '`s!help utility`', true)
+        .addField('🔍 Search', '`s!help search`', true)
+        .addField('\u200b', '\u200b', true)
+        .addField('👮 Moderation', '`s!help moderation`', true)
+        .addField('🎶 Music', '`s!help music`', true)
+        .addField('\u200b', '\u200b', true);
+      message.channel.send(categoriesEmbed);
     }
-  }
-}
+    else if (args[0] && getAllCategories().includes(args[0].toLowerCase())) {
+      const categoryEmbed = new MessageEmbed()
+        .setTitle(`${args[0].charAt(0).toUpperCase()}${args[0].slice(1)} Commands`)
+        .setDescription(getCategory(args[0].toLowerCase()));
+      message.channel.send(categoryEmbed);
+    }
+    else if (args[0] && commands.has(args[0].toLowerCase())) {
+      const command = commands.get(args[0].toLowerCase());
+      const commandHelpEmbed = new MessageEmbed()
+        .addField('Command Name', command.help.name)
+        .addField('Description', command.help.description)
+        .addField('Usage', command.help.usage);
+      message.channel.send(commandHelpEmbed);
+    }
+  },
+};
 
-function getCategory(category){
+
+function getCategory(category) {
   const array = new Array();
   commands.forEach((value) => {
-    if(value.category && value.category==category){
+    if(value.category && value.category == category) {
       array.push(`\`${value.name}\``);
     }
   });
 
   return array.toString().replace(/((?:[^\,]*\,){4}[^\,]*)\,/gm, '$1\n');
+}
+
+function getAllCategories() {
+  const categories = new Array();
+  commands.forEach(command => categories.push(command.category));
+  return categories.filter((value, index, self) => self.indexOf(value) === index);
 }
