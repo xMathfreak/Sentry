@@ -14,7 +14,7 @@ module.exports = {
 		let user = (!message.mentions.users.size) ? message.author : message.mentions.users.first();
 		const avatarEmbed = new MessageEmbed()
 			.setTitle(`${user.tag}'s Avatar`)
-			.setImage(user.avatarURL());
+			.setImage(user.avatarURL({ format: "png", dynamic: true, size: 1024 }));
 		message.channel.send(avatarEmbed)
   },
 };
