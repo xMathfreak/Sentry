@@ -50,7 +50,7 @@ module.exports = {
       requester: message.author,
     };
 
-    if (song.duration >= 10830) return errorMessage(message, 'Cannot play a song longer than 3 hours');
+    if (song.duration >= 36600) return errorMessage(message, 'Cannot play a song longer than 10 hours');
 
     if (!serverQueue) {
       const queueConstruct = {
