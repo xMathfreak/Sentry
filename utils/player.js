@@ -45,12 +45,12 @@ module.exports = {
       title: songInfo.videoDetails.title,
       url: songInfo.videoDetails.video_url,
       duration: songInfo.videoDetails.lengthSeconds,
-      thumbnail: songInfo.videoDetails.thumbnail.thumbnails[songInfo.videoDetails.thumbnail.thumbnails.length - 1].url,
+      thumbnail: songInfo.videoDetails.thumbnails[songInfo.videoDetails.thumbnails.length - 1].url,
       author: songInfo.videoDetails.author.name,
       requester: message.author,
     };
 
-    if (song.duration >= 36600) return errorMessage(message, 'Cannot play a song longer than 10 hours');
+    if (song.duration >= 10830) return errorMessage(message, 'Cannot play a song longer than 3 hours');
 
     if (!serverQueue) {
       const queueConstruct = {

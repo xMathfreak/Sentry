@@ -6,6 +6,6 @@ module.exports = {
       .setTitle(`**❌ Error: ${content}**`)
       .setColor(13369395)
       .setTimestamp();
-    message.channel.send(errorEmbed);
+    message.channel.send(errorEmbed).catch(e => console.log(e));
   },
 };
