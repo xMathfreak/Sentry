@@ -6,13 +6,13 @@
     "author": "Mathfreak",
     "dependencies": {
         "cheerio": "^1.0.0-rc.3",
-        "discord-ytdl-core": "^5.0.0",
+        "discord-ytdl-core": "latest",
         "discord.js": "^12.3.1",
         "ffmpeg-static": "^4.2.7",
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
-        "scrape-youtube": "^2.0.7",
-        "ytdl-core": "^4.2.1"
+        "scrape-youtube": "latest",
+        "ytdl-core": "latest"
     },
     "engines": {
         "node": "12.13.x"
