@@ -276,12 +276,13 @@ async function playSong(guild, song) {
       quality: 'highestaudio',
       opusEncoded: true,
       filter: 'audioonly',
-      highWaterMark: 1 << 20,
+      highWaterMark: 1 << 22,
       range: {
         start: '0',
       },
     }), {
       type: 'opus',
+      highWaterMark: 1,
       bitrate: 'auto',
     },
   )
