@@ -173,8 +173,8 @@ module.exports = {
     const currentSong = serverQueue.songs[0];
     const desc = serverQueue.songs.slice(1)
       .slice((page * 5) - 5, page * 5)
-      .map((song, index) => `\`${1 + index + ((page - 1) * 5)}.\` [${escapeMarkdown(song.title)}](${song.url}) | \`${new Date(song.duration * 1000).toISOString().substr(11, 8)} Requested by: ${song.requester.tag}\``);
-
+      .map((song, index) => `\`${1 + index + ((page - 1) * 5)}.\` [${song.title.length > 260 ? `${escapeMarkdown(song.title.substring(0, 256))}...` : escapeMarkdown(song.title)}](${song.url}) | \`${new Date(song.duration * 1000).toISOString().substr(11, 8)} Requested by: ${song.requester.tag}\``);
+    
     const splitDesc = splitMessage(desc, {
       maxLength: 1024,
       char: '\n',
@@ -184,7 +184,7 @@ module.exports = {
 
     const queueEmbed = new MessageEmbed()
       .setTitle(`Queue for ${message.guild.name}`)
-      .addField('Now Playing:', `[${escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${new Date(currentSong.duration * 1000).toISOString().substr(11, 8)} Requested by: ${currentSong.requester.tag}\``)
+      .addField('Now Playing:', `[${currentSong.length > 260 ? `${escapeMarkdown(currentSong.title.substring(0, 256))}...` : escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${new Date(currentSong.duration * 1000).toISOString().substr(11, 8)} Requested by: ${currentSong.requester.tag}\``)
       .addField('Up next:', splitDesc[0] || 'Nothing')
       .setFooter(`Page ${page}/${pageNum}`, message.author.avatarURL());
     message.channel.send(queueEmbed);
