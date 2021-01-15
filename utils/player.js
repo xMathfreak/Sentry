@@ -170,23 +170,13 @@ module.exports = {
 
     if (page >= Math.ceil(serverQueue.songs.length / 5) + 1) return errorMessage(message, `Queue ends at ${Math.ceil(serverQueue.songs.length / 5)}`);
 
-    const currentSong = serverQueue.songs[0];
-    const desc = serverQueue.songs.slice(1)
-      .slice((page * 5) - 5, page * 5)
-      .map((song, index) => `\`${1 + index + ((page - 1) * 5)}.\` [${song.title.length > 260 ? `${escapeMarkdown(song.title.substring(0, 256))}...` : escapeMarkdown(song.title)}](${song.url}) | \`${new Date(song.duration * 1000).toISOString().substr(11, 8)} Requested by: ${song.requester.tag}\``);
-    
-    const splitDesc = splitMessage(desc, {
-      maxLength: 1024,
-      char: '\n',
-      prepend: '',
-      append: '',
-    });
-
+    const currentSong = `**Now Playing:** \n[${serverQueue.songs[0].title.length > 260 ? `${escapeMarkdown(serverQueue.songs[0].title.substring(0, 256))}...` : escapeMarkdown(serverQueue.songs[0].title)}](${serverQueue.songs[0].url}) | \`${new Date(serverQueue.songs[0].duration * 1000).toISOString().substr(11, 8)} Requested by: ${serverQueue.songs[0].requester.tag}\``;
+    const upNext = `**Up Next:** \n${serverQueue.songs.length > 1 ? serverQueue.songs.slice(1).slice((page * 5) - 5, page * 5).map((song, index) => `\`${1 + index + ((page - 1) * 5)}.\` [${song.title.length > 260 ? `${escapeMarkdown(song.title.substring(0, 256))}...` : escapeMarkdown(song.title)}](${song.url}) | \`${new Date(song.duration * 1000).toISOString().substr(11, 8)} Requested by: ${song.requester.tag}\``).join('\n') : 'Nothing'}`;
+    const splitDesc = splitMessage(`${currentSong}\n${upNext}`, { maxLength: 2048, char: '\n', prepend: '', append: '',});
     const queueEmbed = new MessageEmbed()
       .setTitle(`Queue for ${message.guild.name}`)
-      .addField('Now Playing:', `[${currentSong.length > 260 ? `${escapeMarkdown(currentSong.title.substring(0, 256))}...` : escapeMarkdown(currentSong.title)}](${currentSong.url}) | \`${new Date(currentSong.duration * 1000).toISOString().substr(11, 8)} Requested by: ${currentSong.requester.tag}\``)
-      .addField('Up next:', splitDesc[0] || 'Nothing')
-      .setFooter(`Page ${page}/${pageNum}`, message.author.avatarURL());
+      .setDescription(splitDesc[0])
+      .setFooter(`Page ${page}/${pageNum}`, message.author.avatarURL())
     message.channel.send(queueEmbed);
   },
 
