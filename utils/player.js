@@ -1,15 +1,18 @@
 const { splitMessage, escapeMarkdown, MessageEmbed } = require('discord.js');
 const { errorMessage } = require('../utils/errors.js');
-const scrapeYT = require('scrape-youtube').default;
-const ytdl = require('ytdl-core');
-const ytdlDiscord = require('discord-ytdl-core');
+const { default:youtube } = require('scrape-youtube');
+const ytdl = require('discord-ytdl-core');
+const ytpl = require('ytpl');
+
+const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.*\?(?!list=).+$/gi;
+const plRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.*\?.*\blist=.*$/gi;
 
 const queue = new Map();
-const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
 
 module.exports = {
-  play: async function(message, args) {
+  play : async function(message, args) {
     if (!args[0]) return;
+
     const search = args.join(' ');
     const url = args[0].replace(/<|>/g, '');
 
@@ -18,49 +21,58 @@ module.exports = {
     const permission = voiceChannel.permissionsFor(message.guild.me);
 
     if (!voiceChannel) return errorMessage(message, 'You need to be in a voice channel to use this command');
-    if (!permission.has('CONNECT') || !permission.has('SPEAK')) return errorMessage(message, 'I do not have permissions to join or speak in your voice channel');
-    if (!url) return errorMessage(message, 'You need to enter a song to search for');
-    if (serverQueue && voiceChannel != message.guild.me.voice.channel) return errorMessage(message, 'You need to be in the same voice channel as me');
+    if (!permission.has('CONNECT') || !permission.has('SPEAK')) return errorMessage(message, 'I do not have permissions to join or speak in this channel');
+    if (!url) return errorMessage(message, 'You need to search for a song');
+    if (serverQueue && voiceChannel != message.guild.me.voice.channel) return errorMessage(message, 'We have to be in the same voice channel');
+
+    if (plRegex.test(url)) return module.exports.playlist(message, args);
 
     let song = null;
     let songInfo = null;
 
-    if (ytRegex.test(url)) {
-      try {
+    if (ytRegex.test(url)){
+      try{
         songInfo = await ytdl.getInfo(url);
       }
-      catch (e) {
+      catch (e){
         console.log(e);
-        return errorMessage(message, 'There was an error while finding the song');
+        errorMessage(message, 'An error occurred while finding the song');
+        return;
       }
     }
-    else {
-      songInfo = await handleVideoFromSearch(message, search, 0).catch();
-      if (!songInfo) return;
+    else{
+      try{
+        message.channel.send(`🔎 **Searching for:** ${search}`);
+        const scrapeResult = await youtube.search(search, { type : 'video' });
+        if (!scrapeResult.videos[0]) return errorMessage(message, 'Song not found');
+        songInfo = await ytdl.getInfo(scrapeResult.videos[0].link);
+      }
+      catch (e){
+        console.log(e);
+        errorMessage(message, 'An error occurred while finding the song');
+      }
     }
 
-    if (songInfo == null) return errorMessage(message, 'There was an error finding the song');
-
     song = {
-      title: songInfo.videoDetails.title,
-      url: songInfo.videoDetails.video_url,
-      duration: songInfo.videoDetails.lengthSeconds,
-      thumbnail: songInfo.videoDetails.thumbnails[songInfo.videoDetails.thumbnails.length - 1].url,
-      author: songInfo.videoDetails.author.name,
-      requester: message.author,
+      title     : songInfo.videoDetails.title,
+      url       : songInfo.videoDetails.video_url,
+      duration  : songInfo.videoDetails.lengthSeconds,
+      thumbnail : songInfo.videoDetails.thumbnails[songInfo.videoDetails.thumbnails.length - 1].url,
+      author    : songInfo.videoDetails.author.name,
+      requester : message.author,
     };
 
-    if (song.duration >= 10830) return errorMessage(message, 'Cannot play a song longer than 3 hours');
+    if (song.duration > 10900) return errorMessage(message, 'You cannot play a song that\'s longer than 3 hours');
 
-    if (!serverQueue) {
+    if (!serverQueue){
       const queueConstruct = {
-        textChannel: message.channel,
-        voiceChannel: voiceChannel,
-        connection: null,
-        songs: [],
-        volume: 100,
-        playing: true,
-        looping: false,
+        textChannel : message.channel,
+        voiceChannel : voiceChannel,
+        connection : null,
+        songs : [],
+        volume : 100,
+        playing : true,
+        looping : false,
       };
 
       queue.set(message.guild.id, queueConstruct);
@@ -76,16 +88,107 @@ module.exports = {
           .setURL(queueConstruct.songs[0].url)
           .setThumbnail(queueConstruct.songs[0].thumbnail)
           .setAuthor('Added to Queue', queueConstruct.songs[0].requester.avatarURL())
-          .addFields({
+          .addFields(
+            {
+              name: 'Channel',
+              value: queueConstruct.songs[0].author,
+              inline: true,
+            },
+            {
+              name: 'Song Duration',
+              value: new Date(queueConstruct.songs[0].duration * 1000).toISOString().substr(11, 8),
+              inline: true,
+          });
+        message.channel.send(playEmbed);
+
+        playSong(message.guild, queueConstruct.songs[0]);
+      }
+      catch (e){
+        queue.delete(message.guild.id);
+        await message.guild.me.voice.channel.leave();
+        console.log(e);
+        errorMessage(message, 'An error occurred while playing the song');
+        return;
+      }
+    }
+    else{
+      serverQueue.voiceChannel = message.guild.me.voice.channel;
+      serverQueue.songs.push(song);
+
+      const playEmbed = new MessageEmbed()
+        .setTitle(escapeMarkdown(song.title))
+        .setURL(song.url)
+        .setThumbnail(song.thumbnail)
+        .setAuthor('Added to Queue', song.requester.avatarURL())
+        .addFields(
+          {
             name: 'Channel',
-            value: queueConstruct.songs[0].author,
+            value: song.author,
             inline: true,
           }, {
             name: 'Song Duration',
-            value: new Date(queueConstruct.songs[0].duration * 1000).toISOString().substr(11, 8),
+            value: new Date(song.duration * 1000).toISOString().substr(11, 8),
             inline: true,
-          });
-        message.channel.send(playEmbed);
+        });
+      message.channel.send(playEmbed);
+    }
+
+  },
+
+  playlist : async function(message, args) {
+    if (!args[0] || !args.join(' ').match(plRegex)) return;
+    
+    const url = args[0].replace(/<|>/g, '');
+    
+    const serverQueue = queue.get(message.guild.id);
+    const voiceChannel = message.member.voice.channel;
+    const permission = voiceChannel.permissionsFor(message.guild.me);
+
+    if (!voiceChannel) return errorMessage(message, 'You need to be in a voice channel to use this command');
+    if (!permission.has('CONNECT') || !permission.has('SPEAK')) return errorMessage(message, 'I do not have permissions to join or speak in this channel');
+    if (!url) return errorMessage(message, 'You need to search for a song');
+    if (serverQueue && voiceChannel != message.guild.me.voice.channel) return errorMessage(message, 'We have to be in the same voice channel');
+
+    let list = null;
+    let songs = [];
+
+    try {
+      list = await ytpl(url);
+      list.items.forEach(item => {
+        songs.push({
+          title     : item.title,
+          url       : item.shortUrl,
+          duration  : item.durationSec,
+          thumbnail : item.bestThumbnail.url,
+          requester : message.author,
+        })
+      });
+      message.channel.send({ embed : { description : `Queued **${list.items.length}** songs` }});
+    }catch(e){
+      if (e.message == 'API-Error: The playlist does not exist.') return errorMessage(message, 'This playlist is either private or does not exist');
+      console.log(e);
+      errorMessage(message, 'An error occurred while loading this playlist');
+      return;
+    }
+    
+    if (!serverQueue) {
+      const queueConstruct = {
+        textChannel: message.channel,
+        voiceChannel: voiceChannel,
+        connection: null,
+        songs: [],
+        volume: 100,
+        playing: true,
+        looping: false,
+      };
+
+      queue.set(message.guild.id, queueConstruct);
+      songs.forEach(song => queueConstruct.songs.push(song));
+
+      try {
+        const connection = await voiceChannel.join();
+        queueConstruct.connection = connection;
+        queueConstruct.connection.voice.setSelfDeaf(true);
 
         playSong(message.guild, queueConstruct.songs[0]);
       }
@@ -97,25 +200,9 @@ module.exports = {
         return errorMessage(message, 'There was an error playing the song');
       }
     }
-    else {
+    else{
       serverQueue.voiceChannel = message.guild.me.voice.channel;
-      serverQueue.songs.push(song);
-
-      const playEmbed = new MessageEmbed()
-        .setTitle(escapeMarkdown(song.title))
-        .setURL(song.url)
-        .setThumbnail(song.thumbnail)
-        .setAuthor('Added to Queue', song.requester.avatarURL())
-        .addFields({
-          name: 'Channel',
-          value: song.author,
-          inline: true,
-        }, {
-          name: 'Song Duration',
-          value: new Date(song.duration * 1000).toISOString().substr(11, 8),
-          inline: true,
-        });
-      message.channel.send(playEmbed);
+      songs.forEach(song => serverQueue.songs.push(song));
     }
 
   },
@@ -247,55 +334,55 @@ module.exports = {
       serverQueue.looping = true;
       message.channel.send('**🔂 Enabled!**');
     }
-  },
+  }, 
 };
 
 async function playSong(guild, song) {
   const serverQueue = queue.get(guild.id);
-  serverQueue.voiceChannel = guild.me.voice.channel;
 
-  if (!song || !serverQueue.songs.length) {
+  if (!song || !serverQueue.songs.length){
     await guild.me.voice.channel.leave();
     queue.delete(guild.id);
     return;
   }
-  if (!guild.me.voice.channel) return queue.delete(guild.id);
 
   const dispatcher = serverQueue.connection.play(
-    ytdlDiscord(song.url, {
-      quality: 'highestaudio',
-      opusEncoded: true,
-      filter: 'audioonly',
-      highWaterMark: 1 << 22,
-      range: {
-        start: '0',
-      },
-    }), {
-      type: 'opus',
-      highWaterMark: 1,
-      bitrate: 'auto',
-    },
+    ytdl(song.url, {
+      quality : 'highestaudio',
+      opusEncoded : true,
+      filter : 'audioonly',
+      highWaterMark : 1 << 22,
+    }),
+    {
+      type : 'opus',
+      highWaterMark : 1,
+      bitrate : 192000,
+    }
   )
-    .on('disconnect', () => {
-      return queue.delete(guild.id);
-    })
-    .on('error', e => {
-      console.log(e);
-      guild.me.voice.channel.leave();
-      dispatcher.destroy();
-      errorMessage(serverQueue.textChannel, 'An error occured while playing the song');
-      return queue.delete(guild.id);
-    })
-    .on('finish', () => {
-      if (!serverQueue.looping) serverQueue.songs.shift();
-      playSong(guild, serverQueue.songs[0]);
-    });
+  .on('disconnect', () => {
+    queue.delete(guild.id);
+    return;
+  })
+  .on('finish', () => {
+    if (!serverQueue) serverQueue.songs.shift();
+    playSong(guild, serverQueue.songs[0]);
+  })
+  .on('error', e => {
+    console.log(e);
+    guild.me.voice.channel.leave();
+    dispatcher.destroy();
+    errorMessage(serverQueue.textChannel, 'An error occured while playing the song');
+    queue.delete(guild.id);
+    return;
+  });
 
   serverQueue.connection.on('disconnect', () => {
-    return queue.delete(guild.id);
+    queue.delete(guild.id);
+    return;
   });
+
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 100);
-  if (!serverQueue.looping) serverQueue.textChannel.send(`🎶 **Playing** \`${song.title}\` - Now`);
+  if (!serverQueue.looping) serverQueue.textChannel.send(`🎶 **Now Playing - **\`${song.title}\``);
 }
 
 function progressBar(value, maxValue, size) {
@@ -308,27 +395,4 @@ function progressBar(value, maxValue, size) {
 
   const bar = `\`\`${progressText}${emptyProgressText}\`\``;
   return bar;
-}
-
-async function handleVideoFromSearch(message, search, tries) {
-  let result = null;
-  try{
-    message.channel.send(`🔎 **Searching for:** ${search}`);
-    const scrapeResult = await scrapeYT.search(search);
-    if (!scrapeResult.videos[0]) return errorMessage(message, 'Song not found');
-    result = await ytdl.getInfo(scrapeResult.videos[0].link);
-  }
-  catch(err) {
-    if (err.message == 'Could not find player config' || err.message == 'Unable to retrieve video metadata') {
-      if (tries < 3) {
-        return setTimeout(() => handleVideoFromSearch(search, tries + 1), 1000);
-      }
-    }
-    else{
-      console.log(err);
-      errorMessage(message, 'An error occurred while finding the song');
-    }
-  }
-
-  return result;
 }
