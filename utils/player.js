@@ -364,7 +364,7 @@ async function playSong(guild, song) {
     return;
   })
   .on('finish', () => {
-    if (!serverQueue) serverQueue.songs.shift();
+    if (!serverQueue.looping) serverQueue.songs.shift();
     playSong(guild, serverQueue.songs[0]);
   })
   .on('error', e => {
