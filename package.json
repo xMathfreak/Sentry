@@ -12,7 +12,8 @@
         "node-opus": "^0.3.3",
         "request": "^2.88.0",
         "scrape-youtube": "^2.0.7",
-        "ytdl-core": "latest"
+        "ytdl-core": "latest",
+        "ytpl": "^2.0.4"
     },
     "engines": {
         "node": "12.13.x"
