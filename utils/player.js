@@ -356,7 +356,6 @@ async function playSong(guild, song) {
     {
       type : 'opus',
       highWaterMark : 1,
-      bitrate : 192000,
     }
   )
   .on('disconnect', () => {
