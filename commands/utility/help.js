@@ -1,4 +1,4 @@
-const { MessageEmbed, Message } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { commands } = require('../../utils/handler.js');
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
     if (!args[0]) {
       const categoriesEmbed = new MessageEmbed()
         .setTitle('Sentry Command Categories')
-        .setDescription('Use `s!help [category]` to view commands under a category!')
+        .setDescription('A list of all command categories.\nUse `s!help [category]` for info on a specific category.\nFor additional info on a command, type `s!help [command]`.')
         .addField('🛠️ Utility', '`s!help utility`', true)
         .addField('🔍 Search', '`s!help search`', true)
         .addField('\u200b', '\u200b', true)
