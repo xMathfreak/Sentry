@@ -367,10 +367,6 @@ async function playSong(guild, song) {
       highWaterMark : 1,
     }
   )
-  .on('disconnect', () => {
-    queue.delete(guild.id);
-    return;
-  })
   .on('finish', () => {
     if (!serverQueue.looping) serverQueue.songs.shift();
     playSong(guild, serverQueue.songs[0]);
@@ -380,6 +376,11 @@ async function playSong(guild, song) {
     guild.me.voice.channel.leave();
     dispatcher.destroy();
     errorMessage(serverQueue.textChannel, 'An error occured while playing the song');
+    queue.delete(guild.id);
+    return;
+  });
+
+	serverQueue.connection.on('disconnect', () => {
     queue.delete(guild.id);
     return;
   });
