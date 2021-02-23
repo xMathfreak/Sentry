@@ -129,6 +129,14 @@ module.exports = {
             name: 'Song Duration',
             value: new Date(song.duration * 1000).toISOString().substr(11, 8),
             inline: true,
+          }, {
+            name: '\u200b',
+            value: '\u200b',
+            inline: true
+          }, {
+            name: 'Position in Queue',
+            value: serverQueue.songs.length,
+            inline: true
         });
       message.channel.send(playEmbed);
     }
@@ -243,7 +251,7 @@ module.exports = {
       .setURL(serverQueue.songs[0].url)
       .setThumbnail(serverQueue.songs[0].thumbnail)
       .setAuthor('Now Playing ♫')
-      .addField(progressBar(seek, serverQueue.songs[0].duration, 32), `\`${new Date(seek * 1000).toISOString().substr(11, 8)} / ${new Date(serverQueue.songs[0].duration * 1000).toISOString().substr(11, 8)} \n\n Requested by: ${serverQueue.songs[0].requester.tag}\``);
+      .addField(progressBar(seek, serverQueue.songs[0].duration, 32), `\`${new Date(seek * 1000).toISOString().substr(11, 8)} / ${new Date(serverQueue.songs[0].duration * 1000).toISOString().substr(11, 8)} \n\nRequested by: ${serverQueue.songs[0].requester.tag}\``);
     message.channel.send(nowPlayingEmbed);
   },
 
@@ -346,7 +354,8 @@ async function playSong(guild, song) {
     return;
   }
 
-  const dispatcher = serverQueue.connection.play(
+  const dispatcher = serverQueue.connection
+	.play(
     ytdl(song.url, {
       quality : 'highestaudio',
       opusEncoded : true,
@@ -371,11 +380,6 @@ async function playSong(guild, song) {
     guild.me.voice.channel.leave();
     dispatcher.destroy();
     errorMessage(serverQueue.textChannel, 'An error occured while playing the song');
-    queue.delete(guild.id);
-    return;
-  });
-
-  serverQueue.connection.on('disconnect', () => {
     queue.delete(guild.id);
     return;
   });
