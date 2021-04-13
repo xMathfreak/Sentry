@@ -20,7 +20,7 @@ module.exports = {
     const channel = bot.client.channels.cache.get(args[0]);
     if (!channel) return errorMessage(message, 'Channel not found');
 
-    const invite = await channel.createInvite({maxAge: 0, maxUses: 1}).catch(console.log);
+    const invite = await channel.createInvite({maxAge: 0, maxUses: 1, unique: true}).catch(console.log);
 
     const inviteEmbed = new MessageEmbed()
       .setTitle(`✉️ Created an invite with link: ${invite}`)
