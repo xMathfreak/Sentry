@@ -22,7 +22,7 @@ module.exports = {
     const rolls = new Array();
 
     while (rolls.length < params[0]){
-      rolls.push(randInt(0, params[1]));
+      rolls.push(randInt(1, params[1]));
     }
 
     const inviteEmbed = new MessageEmbed()
