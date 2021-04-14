@@ -7,12 +7,12 @@ module.exports = {
   help: {
     name: 'Dice Roll',
     description: 'Rolls a dice or multiple die',
-    usage: '`s!roll [n]d[l]`',
+    usage: '`s!roll [rolls]d[range]`',
   },
   category: 'utility',
   execute: async function(message, args) {
     if (!args[0]) return;
-    if (!args[0].match(/([\d]?)+d\d+/g)) return;
+    if (!args[0].match(/\d+d\d+/g)) return;
 
     const params = args[0].split('d');
     
@@ -22,7 +22,7 @@ module.exports = {
     const rolls = new Array();
 
     while (rolls.length < params[0]){
-      rolls.push(randInt(1, params[1]));
+      rolls.push(randInt(0, params[1]));
     }
 
     const inviteEmbed = new MessageEmbed()
