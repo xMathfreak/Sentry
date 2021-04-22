@@ -8,16 +8,14 @@ module.exports = {
   },
   category: 'utility',
   execute: async function(message, args) {
-    if (args[0] && args[1]) {
+    if (!args[0]) return message.channel.send(`🎲 **${Math.floor(Math.random() * 100)}**`);
+
+    if (!args[1]){
+      message.channel.send(`🎲 **${getRandomInt(0, args[0])}**`);
+    }else{
       message.channel.send(`🎲 **${getRandomInt(args[0], args[1])}**`);
     }
-    else if (args[0] && !args[1]) {
-      message.channel.send(`🎲 **${getRandomInt(0, args[0])}**`);
-    }
-    else if (!args[0] && !args[1]) {
-      message.channel.send(`🎲 **${Math.floor(Math.random() * 100)}**`);
-    }
-  },
+  }
 };
 
 function getRandomInt(min, max) {
