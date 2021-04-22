@@ -23,7 +23,7 @@ module.exports = {
     const invite = await channel.createInvite({maxAge: 0, maxUses: 1}).catch(console.log);
 
     const inviteEmbed = new MessageEmbed()
-      .setTitle(`✉️ Created an invite to "${channel.name}" with link: ${invite}`)
+      .setTitle(`✉️ Created an invite to "${channel.name}" with link:\n${invite}`)
       .setColor(16764160)
       .setFooter(`Requested by: ${message.author.tag}`);
     message.channel.send(inviteEmbed);

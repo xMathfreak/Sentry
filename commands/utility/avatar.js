@@ -1,5 +1,4 @@
 const { MessageEmbed } = require('discord.js');
-const { errorMessage } = require('../../utils/errors');
 
 module.exports = {
   name: 'avatar',
@@ -10,11 +9,18 @@ module.exports = {
     usage: '`s!avatar [username]`',
   },
   category: 'utility',
-  execute: async function(message) {
-		let user = (!message.mentions.users.size) ? message.author : message.mentions.users.first();
-		const avatarEmbed = new MessageEmbed()
-			.setTitle(`${user.tag}'s Avatar`)
-			.setImage(user.avatarURL({ format: "png", dynamic: true, size: 1024 }));
-		message.channel.send(avatarEmbed)
-  },
+  execute: async function(message, args) {
+    const client = message.guild.me.client;
+    const id = args[0] || message.author.id;
+
+    if (id.match(/[\#]|[\&]|everyone|here/g)) return;
+
+    const user = client.users.cache.get(id.replace(/\<[\@]|[\!]|\>/g, ''));
+
+    const avatarEmbed = new MessageEmbed()
+      .setTitle(`${user.tag}'s Avatar`)
+      .setImage(user.avatarURL({format: 'png', dynamic: true, size: 2048}))
+      .setFooter(`Requested by: ${message.author.tag}`);
+    message.channel.send(avatarEmbed);
+  }
 };
