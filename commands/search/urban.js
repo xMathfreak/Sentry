@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { errorMessage } = require('../../utils/errors');
-const request = require('request');
+const fetch = require('node-fetch');
 
 module.exports = {
   name: 'urban',
@@ -12,30 +12,17 @@ module.exports = {
   category: 'search',
   aliases: ['urbandict', 'urbandictionary', 'udict', 'udictionary', 'urbansearch'],
   execute: async function(message, args) {
-    if (!args[0]) return errorMessage(message, 'You need to specify a word to search for');
+    if (!args[0]) return errorMessage(message, 'You need to search for a word');
+    const query = encodeURIComponent(args.join(' ')); 
+    const { list } = await fetch(`http://api.urbandictionary.com/v0/define?term=${query}`).then(response => response.json());
+    if (!list.length) return errorMessage(message, 'The word could not be found');
 
-    const options = {
-      url: 'http://api.urbandictionary.com/v0/define?term=' + args.join(' '),
-      method: 'GET',
-      headers: {
-        'Accept': 'text/html',
-        'User-Agent': 'Chrome',
-      },
-    };
-
-    request(options, function(error, response, responseBody) {
-      if (error) return;
-
-      const data = JSON.parse(responseBody);
-
-      if (!data) return errorMessage(message, 'There was an error retrieving the definition');
-      if (!data.list || !data.list[0]) return errorMessage(message, 'The word could not be found');
-
-      const definitionEmbed = new MessageEmbed()
-        .setTitle(`Word: ${data.list[0].word}`)
-        .setDescription(`**Definition:** \n ${data.list[0].definition.replace(/\[|\]/g, '**')}`)
-        .setFooter(`Requested by: ${message.author.tag}`);
-      message.channel.send(definitionEmbed);
-    });
+    const urbanEmbed = new MessageEmbed()
+      .setTitle(`Word: ${list[0].word}`)
+      .setURL(list[0].permalink)
+      .setDescription(`**Definition:** \n${(list.length > 2048 ? `${list[0].definition.slice(0, 2048)}...` : list[0].definition).replace(/\[|\]/g, '**')}`)
+      .setFooter(`Requested by ${message.author.tag}`);
+    message.channel.send(urbanEmbed);
   },
 };
+
