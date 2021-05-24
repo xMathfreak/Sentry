@@ -9,9 +9,14 @@ module.exports = {
   },
   category: 'utility',
   execute: async function(message) {
+    const client = message.guild.me.client;
+
     const statsEmbed = new MessageEmbed()
-      .addField('Uptime', secondsToDhms(process.uptime()))
-      .addField('Memory Usage', `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB`);
+      .setThumbnail(client.user.avatarURL())
+      .addField('Uptime', secondsToDhms(process.uptime()), true)
+      .addField('Memory Usage', `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('General Stats', `Guilds: ${client.guilds.cache.size}`);
     message.channel.send(statsEmbed);
   },
 };
@@ -23,9 +28,9 @@ function secondsToDhms(seconds) {
 	const m = Math.floor(seconds % 3600 / 60);
 	const s = Math.floor(seconds % 60);
 	
-	const dDisplay = d > 0 ? `${d}${(d == 1 ? " day" : " days")}, ` : "";
-	const hDisplay = h > 0 ? `${h}${(h == 1 ? " hour" : " hours")}, ` : "";
-	const mDisplay = m > 0 ? `${m}${(m == 1 ? " minute" : " minutes")}, ` : "";
-	const sDisplay = s > 0 ? `${s}${(s == 1 ? " second" : " seconds")}` : "";
+	const dDisplay = d > 0 ? `${d}d ` : "";
+	const hDisplay = h > 0 ? `${h}h ` : "";
+	const mDisplay = m > 0 ? `${m}m ` : "";
+	const sDisplay = s > 0 ? `${s}s` : "";
 	return `${dDisplay}${hDisplay}${mDisplay}${sDisplay}`.trim().replace(/\,$/g, '');
 }
