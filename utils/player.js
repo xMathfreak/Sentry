@@ -4,7 +4,7 @@ const { default:youtube } = require('scrape-youtube');
 const ytdl = require('discord-ytdl-core');
 const ytpl = require('ytpl');
 
-const ytRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.*\?(?!list=).+$/gi;
+const ytRegex = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/gi;
 const plRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.*\?.*\blist=.*$/gi;
 
 const queue = new Map();
