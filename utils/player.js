@@ -44,8 +44,8 @@ module.exports = {
       try{
         message.channel.send(`🔎 **Searching for:** ${search}`);
         const scrapeResult = await youtube.search(search, { type : 'video' });
-        if (!scrapeResult.videos[0]) return errorMessage(message, 'Song not found');
-        songInfo = await ytdl.getInfo(scrapeResult.videos[0].link);
+        songInfo = scrapeResult.videos[0];
+        if (!songInfo) return errorMessage(message, 'Song not found');
       }
       catch (e){
         console.log(e);
@@ -54,11 +54,12 @@ module.exports = {
     }
 
     song = {
-      title     : songInfo.videoDetails.title,
-      url       : songInfo.videoDetails.video_url,
-      duration  : songInfo.videoDetails.lengthSeconds,
-      thumbnail : songInfo.videoDetails.thumbnails[songInfo.videoDetails.thumbnails.length - 1].url,
-      author    : songInfo.videoDetails.author.name,
+      title     : songInfo.title,
+      url       : songInfo.link,
+      duration  : songInfo.duration,
+      thumbnail : songInfo.thumbnail,
+      author    : songInfo.channel.name,
+      authorURL : songInfo.channel.link,
       requester : message.author,
     };
 
