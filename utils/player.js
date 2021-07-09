@@ -29,10 +29,12 @@ module.exports = {
 
     let song = null;
     let songInfo = null;
+    let details = null;
 
     if (ytRegex.test(url)){
       try{
-        songInfo = await ytdl.getInfo(url);
+        songInfo = await ytdl.getBasicInfo(url);
+        details = songInfo.videoDetails;
       }
       catch (e){
         console.log(e);
@@ -54,12 +56,11 @@ module.exports = {
     }
 
     song = {
-      title     : songInfo.title,
-      url       : songInfo.link,
-      duration  : songInfo.duration,
-      thumbnail : songInfo.thumbnail,
-      author    : songInfo.channel.name,
-      authorURL : songInfo.channel.link,
+      title     : songInfo.title || details.title,
+      url       : songInfo.link || details.video_url,
+      duration  : songInfo.duration || details.lengthSeconds,
+      thumbnail : songInfo.thumbnail || details.thumbnails[details.thumbnails.length - 1].url,
+      author    : songInfo.channel || details.author,
       requester : message.author,
     };
 
@@ -92,7 +93,7 @@ module.exports = {
           .addFields(
             {
               name: 'Channel',
-              value: queueConstruct.songs[0].author,
+              value: song.author.name,
               inline: true,
             },
             {
@@ -124,7 +125,7 @@ module.exports = {
         .addFields(
           {
             name: 'Channel',
-            value: song.author,
+            value: song.author.name,
             inline: true,
           }, {
             name: 'Song Duration',
@@ -368,10 +369,6 @@ async function playSong(guild, song) {
       highWaterMark : 1,
     }
   )
-  .on('disconnect', () => {
-    queue.delete(guild.id);
-    return;
-  })
   .on('finish', () => {
     if (!serverQueue.looping) serverQueue.songs.shift();
     playSong(guild, serverQueue.songs[0]);
@@ -381,6 +378,12 @@ async function playSong(guild, song) {
     guild.me.voice.channel.leave();
     dispatcher.destroy();
     errorMessage(serverQueue.textChannel, 'An error occured while playing the song');
+    queue.delete(guild.id);
+    return;
+  });
+
+  serverQueue.connection.once('disconnect', () => {
+    dispatcher.destroy();
     queue.delete(guild.id);
     return;
   });
