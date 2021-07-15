@@ -17,7 +17,7 @@ module.exports = {
 
     const search = encodeURIComponent(args.join(' '));
 
-    const response = await fetch(`https://results.dogpile.com/serp?qc=images&q=${search}`, {method: 'GET'}).then(response => response.text());
+    const response = await fetch(`https://results.dogpile.com/serp?qc=images&q=${search}`, { headers: { cookie: 'ws_prefs=vr=1&af=Heavy&sh=False' }, method: 'GET' }).then(response => response.text());
     $ = cheerio.load(response);
     const links = $('.image a.link');
     const urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr('href'));
