@@ -14,8 +14,7 @@ module.exports = {
   execute: async function(message, args) {
     if (!args[0]) return errorMessage(message, 'You need to search for an Image');
 
-    const search = encodeURIComponent(args.join(' '));
-    const images = await gthis.image(search, { safe: true });
+    const images = await gthis.image(args.join(' '), { safe: false, additional_params: { pws: 0, adtest: 'off'} });
 
     if (!images.length) return errorMessage(message, 'Couldn\'t find any images based on your search');
     const imageURL = (images.length >= 10) ? images[~~(Math.random() * 10)].url : images[0].url;
