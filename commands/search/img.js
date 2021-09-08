@@ -1,6 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const cheerio = require('cheerio');
-const fetch = require('node-fetch');
+const gthis = require('googlethis');
 const { errorMessage } = require('../../utils/errors');
 
 module.exports = {
@@ -16,14 +15,10 @@ module.exports = {
     if (!args[0]) return errorMessage(message, 'You need to search for an Image');
 
     const search = encodeURIComponent(args.join(' '));
+    const images = await gthis.image(search, { safe: true });
 
-    const response = await fetch(`https://results.dogpile.com/serp?qc=images&q=${search}`, { headers: { cookie: 'ws_prefs=vr=1&af=Heavy&sh=False' }, method: 'GET' }).then(response => response.text());
-    $ = cheerio.load(response);
-    const links = $('.image a.link');
-    const urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr('href'));
-  
-    if (!urls.length) return errorMessage(message, 'Couldn\'t find any images based on your search');
-    const imageURL = (urls.length >= 5) ? urls[~~(Math.random() * 5)] : urls[0];
+    if (!images.length) return errorMessage(message, 'Couldn\'t find any images based on your search');
+    const imageURL = (images.length >= 10) ? images[~~(Math.random() * 10)].url : images[0].url;
 
     const imageEmbed = new MessageEmbed()
       .setTitle('Image Link')
