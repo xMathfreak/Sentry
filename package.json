@@ -1,20 +1,13 @@
 {
     "name": "sentrybot",
     "version": "0.9.3",
-    "description": "still indev",
     "main": "bot.js",
     "author": "Mathfreak",
     "dependencies": {
         "cheerio": "^1.0.0-rc.3",
-        "discord-ytdl-core": "^5.0.4",
         "discord.js": "^12.5.3",
-        "ffmpeg-static": "^4.2.7",
         "googlethis": "^1.1.6",
-        "@discordjs/opus": "^0.4.0",
-        "node-fetch": "^2.6.1",
-        "scrape-youtube": "^2.1.3",
-        "ytdl-core": "^4.8.3",
-        "ytpl": "^2.0.5"
+        "node-fetch": "^2.6.1"
     },
     "engines": {
         "node": "12.13.x"
