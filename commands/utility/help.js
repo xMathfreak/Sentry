@@ -19,7 +19,6 @@ module.exports = {
         .addField('🔍 Search', '`s!help search`', true)
         .addField('\u200b', '\u200b', true)
         .addField('👮 Moderation', '`s!help moderation`', true)
-        .addField('🎶 Music', '`s!help music`', true)
         .addField('\u200b', '\u200b', true);
       message.channel.send(categoriesEmbed);
     }
