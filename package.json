@@ -1,15 +1,16 @@
 {
-    "name": "sentrybot",
-    "version": "0.9.3",
-    "main": "bot.js",
-    "author": "Mathfreak",
-    "dependencies": {
-        "cheerio": "^1.0.0-rc.3",
-        "discord.js": "^12.5.3",
-        "googlethis": "^1.1.6",
-        "node-fetch": "^2.6.1"
-    },
-    "engines": {
-        "node": "12.13.x"
-    }
+  "name": "sentry",
+  "version": "2.5.0",
+  "main": "index.js",
+  "author": "Mathfreak",
+  "dependencies": {
+    "translate-google": "^1.5.0",
+    "cheerio": "^1.0.0-rc.10",
+    "cloudscraper": "^4.6.0",
+    "discord.js": "^13.6.0",
+    "node-fetch": "^3.2.4"
+  },
+  "engines": {
+	  "npm": ">=8.6.0"
+  }
 }
