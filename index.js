@@ -1,37 +1,42 @@
-const fs = require('fs');
-const { Client, Intents, Collection } = require('discord.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { token } = require('./config.json');
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMessageReactions,
+	]
+});
 
-const commands = new Collection();
-const aliases = new Collection();
-const slashcmds = new Collection();
+client.commands = new Collection();
 
-client.container = {
-	aliases,
-	commands,
-	slashcmds
-};
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath)
+	.filter(file => file.endsWith('.js'));
 
-const events = fs.readdirSync(`./events`).filter(file => file.endsWith(`.js`));
-for (const file of events) {
-	const eventName = file.split(`.`)[0];
-	const event = require(`./events/${file}`);
-	client.on(eventName, event.bind(null, client));
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+
+	client.commands.set(command.data.name, command);
 }
 
-const commandsDir = fs.readdirSync(`./commands`);
-for (const folder of commandsDir) {
-	const categories = fs.readdirSync(`./commands/${folder}`);
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath)
+	.filter(file => file.endsWith('.js'));
 
-	for (file of categories) {
-		const commandName = file.split(`.`)[0];
-		const command = require(`./commands/${folder}/${file}`);
+for (const file of eventFiles) {
+	const filePath = path.join(eventsPath, file);
 
-		command.help.category = folder;
-		client.container.commands.set(commandName, command);
-		command.conf.aliases.forEach(alias => client.container.aliases.set(alias, commandName));
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
 
-client.login(process.env.BOT_TOKEN);
+client.login(token);
